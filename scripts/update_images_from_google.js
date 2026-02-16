@@ -6,8 +6,8 @@ const path = require('path');
 // ------------------------------------------------------------------
 // CONFIGURASYON (GITHUB BİLGİLERİNİZİ BURAYA GİRİN)
 // ------------------------------------------------------------------
-const GITHUB_USERNAME = "USER_NAME"; // Github kullanıcı adınız
-const GITHUB_REPO = "REPO_NAME";     // Repo adınız (örn: RamadanApp)
+const GITHUB_USERNAME = "ozerdemir1998"; // Github kullanıcı adınız
+const GITHUB_REPO = "RamadanApp-Assets"; // Yeni PUBLIC repo adınız
 const BRANCH = "main";               // Genellikle main veya master
 // ------------------------------------------------------------------
 
@@ -130,11 +130,14 @@ async function updateImages() {
         const currentImage = data.image;
 
         // Halihazırda github raw linki varsa atla
+        // BUGFIX: Dosyalar silinmiş olabilir, o yüzden tekrar indiriyoruz.
+        /*
         if (currentImage && currentImage.includes('raw.githubusercontent.com')) {
-            process.stdout.write(`Skipping ${recipeTitle.substring(0, 15)}... (Already GitHub)\n`);
-            skippedCount++;
-            continue;
+             process.stdout.write(`Skipping ${recipeTitle.substring(0, 15)}... (Already GitHub)\n`);
+             skippedCount++;
+             continue;
         }
+        */
 
         process.stdout.write(`Processing: ${recipeTitle.substring(0, 20).padEnd(20)} | `);
 
@@ -150,7 +153,8 @@ async function updateImages() {
             if (savedFilename) {
                 // 3. GitHub Raw Linkini Oluştur ve Kaydet
                 // Link formatı: https://raw.githubusercontent.com/[USER]/[REPO]/[BRANCH]/assets/recipe_images/[FILENAME]
-                const finalUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/${BRANCH}/assets/recipe_images/${savedFilename}`;
+                // Kullanıcı ana repodaki 'assets/recipe_images' klasörünü kullanıyor.
+                const finalUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/RamadanApp/${BRANCH}/assets/recipe_images/${savedFilename}`;
 
                 await db.collection("recipes").doc(docSnap.id).update({
                     image: finalUrl

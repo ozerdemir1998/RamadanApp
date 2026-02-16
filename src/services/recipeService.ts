@@ -16,7 +16,9 @@ const CATEGORY_MAP: { [key: string]: string[] } = {
   'ana_yemek': ['Et yemekleri'],
   'tavuk_yemekleri': ['Tavuk'],
   'ara_sicak': ['Ara sıcak'],
-  'sebze_salata': ['Sebze', 'Salata'], // İkisini de kapsasın
+  'sebze': ['Sebze', 'Zeytinyağlı'],
+  'salata': ['Salata'],
+  'karbonhidrat': ['Makarna', 'Pilav', 'Hamur İşi', 'Börek'],
   'tatlilar': ['Tatlılar'],
   'sahurluk': ['Kahvaltılık', 'Sahur'] // Veride yoksa boş döner
 };

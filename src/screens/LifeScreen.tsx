@@ -16,8 +16,9 @@ const CATEGORIES = [
   { id: 'ana_yemek', title: 'Et Yemekleri', icon: 'food-steak' },
   { id: 'tavuk_yemekleri', title: 'Tavuk', icon: 'food-drumstick' },
   { id: 'ara_sicak', title: 'Ara Sıcak', icon: 'food-croissant' },
-  { id: 'sebze_salata', title: 'Salata & Sebze', icon: 'leaf' },
-  { id: 'makarna', title: 'Makarna', icon: 'noodles' },
+  { id: 'sebze', title: 'Sebze', icon: 'carrot' },
+  { id: 'salata', title: 'Salata', icon: 'leaf' },
+  { id: 'karbonhidrat', title: 'Karbonhidratlar', icon: 'noodles' },
   { id: 'tatlilar', title: 'Tatlılar', icon: 'cupcake' },
 ];
 
@@ -246,11 +247,7 @@ export default function LifeScreen() {
                   style={styles.categoryGradient}
                 >
                   <View style={styles.catIconBox}>
-                    {cat.id === 'sebze_salata' ? (
-                      <Ionicons name="leaf" size={28} color="#D4AF37" />
-                    ) : (
-                      <MaterialCommunityIcons name={cat.icon as any} size={28} color="#D4AF37" />
-                    )}
+                    <MaterialCommunityIcons name={cat.icon as any} size={28} color="#D4AF37" />
                   </View>
                   <Text style={styles.catTitle}>{cat.title}</Text>
                 </LinearGradient>

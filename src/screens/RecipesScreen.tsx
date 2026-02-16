@@ -43,8 +43,9 @@ export default function RecipesScreen() {
             'ana_yemek': 'Et Yemekleri',
             'tavuk_yemekleri': 'Tavuk Yemekleri',
             'ara_sicak': 'Ara Sıcaklar',
-            'sebze_salata': 'Salatalar & Sebze',
-            'makarna': 'Makarna & Hamur',
+            'sebze': 'Sebze Yemekleri',
+            'salata': 'Salatalar',
+            'karbonhidrat': 'Karbonhidratlar',
             'tatlilar': 'Tatlılar'
         };
 
