@@ -175,7 +175,7 @@ export default function AbdestVisualScreen({ onClose }: { onClose: () => void })
                     onRequestClose={handleBackToMenu}
                 >
                     <LinearGradient colors={['#0F2027', '#203A43', '#2C5364']} style={{ flex: 1 }}>
-                        <StatusBar hidden={false} barStyle="light-content" />
+                        <StatusBar hidden={true} barStyle="light-content" />
 
                         {/* NamazVisualScreen MİMARİSİ UYGULANIYOR */}
                         <View style={{ flex: 1 }} onTouchEnd={handlePress}>

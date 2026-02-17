@@ -3,7 +3,7 @@ import * as NavigationBar from 'expo-navigation-bar';
 import { Tabs } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Image, Platform, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // İkon ve Altın Çizgi Bileşeni (Sizin Orijinal Kodunuz)
@@ -93,7 +93,14 @@ export default function TabLayout() {
             title: 'Kuran',
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
-              <TabIconWithLine name="book" focused={focused} color={color} />
+              <View style={styles.iconContainer}>
+                <Image
+                  source={require('../../assets/icons/quran.png')}
+                  style={{ width: 32, height: 32, tintColor: color }}
+                  resizeMode="contain"
+                />
+                {focused && <View style={styles.underline} />}
+              </View>
             ),
           }}
         />

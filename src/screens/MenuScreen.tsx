@@ -19,7 +19,10 @@ import ZikirmatikScreen from './ZikirmatikScreen';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const ICON_PATTERN = require('../../assets/icons/pattern.png');
 
+import { useRouter } from 'expo-router';
+
 export default function MenuScreen() {
+  const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
   const [activeScreen, setActiveScreen] = useState<string | null>(null);
 
@@ -106,7 +109,11 @@ export default function MenuScreen() {
             {/* Namaz Hocası (Yeni) */}
             <TouchableOpacity style={styles.menuItem} onPress={() => openModal('NAMAZ_VISUAL')} activeOpacity={0.7}>
               <View style={[styles.iconBox, { backgroundColor: 'rgba(255, 215, 0, 0.1)' }]}>
-                <MaterialCommunityIcons name="human-handsdown" size={24} color="#FFD700" />
+                <Image
+                  source={require('../../assets/icons/prayer.png')}
+                  style={{ width: 24, height: 24, tintColor: '#FFD700' }}
+                  resizeMode="contain"
+                />
               </View>
               <View style={styles.menuTextContent}>
                 <Text style={styles.menuTitle}>Namaz Hocası</Text>
@@ -128,7 +135,6 @@ export default function MenuScreen() {
               </View>
               <Ionicons name="chevron-forward" size={24} color="#D4AF37" />
             </TouchableOpacity>
-
 
 
             <View style={styles.separator} />
@@ -188,6 +194,7 @@ export default function MenuScreen() {
 
             <View style={styles.separator} />
 
+
             {/* Kaza Takibi */}
             <TouchableOpacity style={styles.menuItem} onPress={() => openModal('KAZA_TAKIP')} activeOpacity={0.7}>
               <View style={[styles.iconBox, { backgroundColor: 'rgba(231, 76, 60, 0.1)' }]}>
@@ -196,6 +203,24 @@ export default function MenuScreen() {
               <View style={styles.menuTextContent}>
                 <Text style={styles.menuTitle}>Kaza Takibi</Text>
                 <Text style={styles.menuSubtitle}>Borçlarınızı not alın</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color="#D4AF37" />
+            </TouchableOpacity>
+
+            <View style={styles.separator} />
+
+            {/* Favori Tariflerim */}
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.push('/favorites')}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.iconBox, { backgroundColor: 'rgba(231, 76, 60, 0.1)' }]}>
+                <Ionicons name="heart" size={24} color="#E74C3C" />
+              </View>
+              <View style={styles.menuTextContent}>
+                <Text style={styles.menuTitle}>Favori Tariflerim</Text>
+                <Text style={styles.menuSubtitle}>Beğendiğiniz lezzetler</Text>
               </View>
               <Ionicons name="chevron-forward" size={24} color="#D4AF37" />
             </TouchableOpacity>

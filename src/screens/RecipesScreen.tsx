@@ -1,3 +1,4 @@
+import { useFavorites } from '@/context/FavoritesContext';
 import { fetchRecipesByCategory } from '@/services/recipeService';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -26,6 +27,7 @@ export default function RecipesScreen() {
     const [translatedTitle, setTranslatedTitle] = useState("");
 
     const insets = useSafeAreaInsets();
+    const { toggleFavorite, isFavorite } = useFavorites();
 
     // --- ARAMA STATE'LERİ ---
     const [isSearchVisible, setIsSearchVisible] = useState(false);
@@ -105,53 +107,68 @@ export default function RecipesScreen() {
         recipe.title.toLowerCase().includes(activeFilter.toLowerCase())
     );
 
-    const renderRecipeCard = ({ item, index }: { item: any, index: number }) => (
-        <TouchableOpacity
-            style={[styles.cardContainer, {
-                marginLeft: SPACING,
-                marginBottom: SPACING,
-                marginRight: index % 2 === 1 ? SPACING : 0
-            }]}
-            activeOpacity={0.9}
-            onPress={() => router.push({
-                pathname: '/recipe-detail',
-                params: { recipeId: item.id }
-            })}
-        >
-            <View style={styles.imageWrapper}>
-                {item.image ? (
-                    <Image
-                        source={{ uri: item.image }}
-                        style={styles.cardImage}
-                        placeholder={blurhash}
-                        contentFit="cover"
-                        transition={500}
-                    />
-                ) : (
-                    <View style={[styles.cardImage, { backgroundColor: '#2C3E50', justifyContent: 'center', alignItems: 'center' }]}>
-                        <MaterialCommunityIcons name="food-variant" size={40} color="rgba(255,255,255,0.2)" />
-                    </View>
-                )}
+    const renderRecipeCard = ({ item, index }: { item: any, index: number }) => {
+        const isFav = isFavorite(item.id);
 
-                {/* Kalp İkonu (Görsel Amaçlı) */}
-                <View style={styles.likeBadge}>
-                    <Ionicons name="heart-outline" size={16} color="#fff" />
+        return (
+            <TouchableOpacity
+                style={[styles.cardContainer, {
+                    marginLeft: SPACING,
+                    marginBottom: SPACING,
+                    marginRight: index % 2 === 1 ? SPACING : 0
+                }]}
+                activeOpacity={0.9}
+                onPress={() => router.push({
+                    pathname: '/recipe-detail',
+                    params: { recipeId: item.id }
+                })}
+            >
+                <View style={styles.imageWrapper}>
+                    {item.image ? (
+                        <Image
+                            source={{ uri: item.image }}
+                            style={styles.cardImage}
+                            placeholder={blurhash}
+                            contentFit="cover"
+                            transition={500}
+                        />
+                    ) : (
+                        <View style={[styles.cardImage, { backgroundColor: '#2C3E50', justifyContent: 'center', alignItems: 'center' }]}>
+                            <MaterialCommunityIcons name="food-variant" size={40} color="rgba(255,255,255,0.2)" />
+                        </View>
+                    )}
+
+                    {/* Kalp İkonu */}
+                    <TouchableOpacity
+                        style={styles.likeBadge}
+                        onPress={() => toggleFavorite({
+                            id: item.id,
+                            title: item.title,
+                            image: item.image
+                        })}
+                    >
+                        <Ionicons
+                            name={isFav ? "heart" : "heart-outline"}
+                            size={18}
+                            color={isFav ? "#E74C3C" : "#fff"}
+                        />
+                    </TouchableOpacity>
                 </View>
-            </View>
 
-            <View style={styles.cardContent}>
-                <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
+                <View style={styles.cardContent}>
+                    <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
 
-                <View style={styles.cardFooter}>
-                    <View style={styles.timeTag}>
-                        <MaterialCommunityIcons name="clock-outline" size={12} color="#D4AF37" />
-                        <Text style={styles.timeText}>30 dk</Text>
+                    <View style={styles.cardFooter}>
+                        <View style={styles.timeTag}>
+                            <MaterialCommunityIcons name="clock-outline" size={12} color="#D4AF37" />
+                            <Text style={styles.timeText}>30 dk</Text>
+                        </View>
+                        <Ionicons name="chevron-forward-circle" size={20} color="#D4AF37" />
                     </View>
-                    <Ionicons name="chevron-forward-circle" size={20} color="#D4AF37" />
                 </View>
-            </View>
-        </TouchableOpacity>
-    );
+            </TouchableOpacity>
+        );
+    };
 
     return (
         <LinearGradient

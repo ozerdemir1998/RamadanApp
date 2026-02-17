@@ -23,9 +23,23 @@ export default function QuranListScreen() {
 
     const loadSurahs = async () => {
         try {
-            const data = await quranService.getSurahs();
-            setSurahs(data);
-            setFilteredSurahs(data);
+            // Paralel olarak API'den sureleri ve Firebase'den Türkçe isimleri çek
+            const [apiSurahs, firebaseNames] = await Promise.all([
+                quranService.getSurahs(),
+                quranService.getSurahNamesMap()
+            ]);
+
+            // API verisindeki ingilizce isimleri Türkçe ile değiştir
+            const mergedSurahs = apiSurahs.map(surah => ({
+                ...surah,
+                englishName: firebaseNames[surah.number] || surah.englishName
+            }));
+
+            // Firebase'de sıralama garanti olmayabilir, ID'ye göre sırala (API zaten sıralı döner ama garanti olsun)
+            mergedSurahs.sort((a, b) => a.number - b.number);
+
+            setSurahs(mergedSurahs);
+            setFilteredSurahs(mergedSurahs);
         } catch (error) {
             console.error(error);
         } finally {

@@ -1,4 +1,8 @@
 import axios from 'axios';
+import { collection, getDocs, getFirestore } from 'firebase/firestore';
+import { app } from '../config/firebaseConfig';
+
+const db = getFirestore(app);
 
 const BASE_URL = 'http://api.alquran.cloud/v1';
 
@@ -26,6 +30,24 @@ export interface Ayah {
 }
 
 export const quranService = {
+    // Firebase'den Türkçe Sure İsimlerini Çek
+    async getSurahNamesMap(): Promise<Record<number, string>> {
+        try {
+            const querySnapshot = await getDocs(collection(db, "surah_names"));
+            const namesMap: Record<number, string> = {};
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                if (data.id && data.name) {
+                    namesMap[data.id] = data.name;
+                }
+            });
+            return namesMap;
+        } catch (error) {
+            console.error("Error fetching surah names from Firebase:", error);
+            return {};
+        }
+    },
+
     // Tüm Sureleri Listele
     async getSurahs(): Promise<Surah[]> {
         try {

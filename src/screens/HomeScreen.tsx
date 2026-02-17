@@ -20,6 +20,7 @@ const ICON_PATTERN = require('../../assets/icons/pattern.png');
 const ICON_ESMA = require('../../assets/icons/esma.png');
 const ICON_QUOTE = require('../../assets/icons/quote.png');
 
+
 // --- STATİK VERİLER ---
 const ESMA_LIST = [
   { name: "El-Rahmân", meaning: "Dünyada bütün mahlûkata merhamet eden." },
@@ -288,9 +289,11 @@ export default function HomeScreen() {
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
         >
-
           {/* HEADER */}
           <View style={styles.headerContainer}>
+
+
+
             <View style={styles.titleRow}>
               <MaterialCommunityIcons
                 name={getPrayerIcon(currentPrayerTitle) as any}
@@ -379,7 +382,8 @@ const styles = StyleSheet.create({
   bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.07, tintColor: '#D4AF37', resizeMode: 'contain' },
 
   // HEADER
-  headerContainer: { alignItems: 'center', marginTop: IS_SMALL_DEVICE ? 15 : 30, marginBottom: IS_SMALL_DEVICE ? 30 : 50 },
+  headerContainer: { alignItems: 'center', marginTop: IS_SMALL_DEVICE ? 15 : 30, marginBottom: IS_SMALL_DEVICE ? 30 : 50, position: 'relative' },
+
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
   headerTitle: { fontSize: IS_SMALL_DEVICE ? 56 : 72, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', color: '#D4AF37', letterSpacing: 1, lineHeight: IS_SMALL_DEVICE ? 60 : 80, textAlign: 'center' },
   headerSubtitle: { color: 'rgba(212, 175, 55, 0.7)', fontSize: 18, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', letterSpacing: 1, marginTop: 5 },

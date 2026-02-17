@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -7,6 +7,11 @@ import { ActivityIndicator, Dimensions, FlatList, Platform, ScrollView, StyleShe
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
 import { Ayah, quranService } from '../services/quranService';
+
+// ... (imports remain the same)
+
+// Inside QuranDetailScreen component:
+
 
 // --- HELPER: ARAPÇA RAKAMLAR ---
 const renderArabicNumber = (n: number) => {
@@ -93,6 +98,8 @@ export default function QuranDetailScreen() {
             setCurrentPageIndex(viewableItems[0].index ?? 0);
         }
     }).current;
+
+    const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 }).current;
 
     // --- AUDIO LOGIC ---
     const stopAudio = async () => {
@@ -255,6 +262,30 @@ export default function QuranDetailScreen() {
                 title={surahName}
                 onLeftPress={() => router.back()}
                 centerTitle
+                rightIcon={
+                    <View style={styles.iconToggleContainer}>
+                        <TouchableOpacity
+                            style={[styles.iconButton, viewMode === 'list' && styles.activeIconButton]}
+                            onPress={() => setViewMode('list')}
+                        >
+                            <MaterialCommunityIcons
+                                name="format-list-bulleted"
+                                size={20}
+                                color={viewMode === 'list' ? '#0F2027' : 'rgba(255,255,255,0.5)'}
+                            />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.iconButton, viewMode === 'page' && styles.activeIconButton]}
+                            onPress={() => setViewMode('page')}
+                        >
+                            <MaterialCommunityIcons
+                                name="book-open-page-variant"
+                                size={20}
+                                color={viewMode === 'page' ? '#0F2027' : 'rgba(255,255,255,0.5)'}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                }
             />
 
             {loading ? (
@@ -266,6 +297,7 @@ export default function QuranDetailScreen() {
                 <>
                     {viewMode === 'list' ? (
                         <FlatList
+                            key="list-mode"
                             ref={flatListRef}
                             data={ayahs}
                             // ...
@@ -276,6 +308,7 @@ export default function QuranDetailScreen() {
                         />
                     ) : (
                         <FlatList
+                            key="page-mode"
                             ref={pageListRef}
                             data={pages}
                             keyExtractor={(item) => item.pageNumber.toString()}
@@ -284,7 +317,7 @@ export default function QuranDetailScreen() {
                             pagingEnabled
                             showsHorizontalScrollIndicator={false}
                             onViewableItemsChanged={onViewableItemsChanged}
-                            viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
+                            viewabilityConfig={viewabilityConfig}
                             getItemLayout={(data, index) => (
                                 { length: Dimensions.get('window').width, offset: Dimensions.get('window').width * index, index }
                             )}
@@ -456,5 +489,26 @@ const styles = StyleSheet.create({
     endOfAyah: {
         color: '#C0392B', // Ayet sonu işareti (süs)
         fontSize: 22
+    },
+
+    // TOGGLE BUTTON STYLES
+    iconToggleContainer: {
+        flexDirection: 'row',
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        borderRadius: 20,
+        padding: 4,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)'
+    },
+    iconButton: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginLeft: 2
+    },
+    activeIconButton: {
+        backgroundColor: '#D4AF37'
     }
 });

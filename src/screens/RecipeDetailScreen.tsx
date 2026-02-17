@@ -1,10 +1,11 @@
+import { useFavorites } from '@/context/FavoritesContext';
 import { fetchRecipeDetail } from '@/services/recipeService';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Dimensions, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
 
@@ -23,6 +24,9 @@ export default function RecipeDetailScreen() {
 
     // Çevrilmiş Metinler
     const [trName, setTrName] = useState("");
+
+    const { toggleFavorite, isFavorite } = useFavorites();
+    const isFav = isFavorite(recipeId as string);
 
     useEffect(() => {
         loadDetail();
@@ -83,6 +87,23 @@ export default function RecipeDetailScreen() {
                         colors={['transparent', '#0F2027']}
                         style={styles.bottomGradient}
                     />
+
+                    {/* FAVORİ BUTONU (EKLENDİ) */}
+                    <TouchableOpacity
+                        style={styles.favButton}
+                        onPress={() => toggleFavorite({
+                            id: recipe.id,
+                            title: recipe.title,
+                            image: recipe.image
+                        })}
+                        activeOpacity={0.8}
+                    >
+                        <Ionicons
+                            name={isFav ? "heart" : "heart-outline"}
+                            size={28}
+                            color={isFav ? "#E74C3C" : "#fff"}
+                        />
+                    </TouchableOpacity>
                 </View>
 
                 {/* 2. İÇERİK (KOYU TEMA) */}
@@ -147,6 +168,25 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         padding: 20,
         paddingBottom: 45
+    },
+    favButton: {
+        position: 'absolute',
+        bottom: -25, // İçeriğin üstünde yüzmesi için
+        right: 30,
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: '#1E2A32',
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 5 },
+        shadowOpacity: 0.5,
+        shadowRadius: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(212, 175, 55, 0.3)',
+        zIndex: 50
     },
 
     // İÇERİK GÖVDESİ

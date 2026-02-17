@@ -264,7 +264,7 @@ export default function NamazVisualScreen({ onClose }: { onClose?: () => void })
     return (
       <Modal visible={showSlideshow} animationType="fade" transparent={false} onRequestClose={() => setShowSlideshow(false)}>
         <LinearGradient colors={['#0F2027', '#203A43', '#2C5364']} style={{ flex: 1 }}>
-          <StatusBar hidden={false} barStyle="light-content" />
+          <StatusBar hidden={true} barStyle="light-content" />
 
           {/* Navigasyon Alanı (Tüm Ekran) */}
           <View style={{ flex: 1 }} onTouchEnd={handlePress}>
