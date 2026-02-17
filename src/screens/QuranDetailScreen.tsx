@@ -104,11 +104,15 @@ export default function QuranDetailScreen() {
     // --- AUDIO LOGIC ---
     const stopAudio = async () => {
         if (sound) {
-            await sound.unloadAsync();
+            try {
+                const status = await sound.getStatusAsync();
+                if (status.isLoaded) {
+                    await sound.unloadAsync();
+                }
+            } catch (e) { /* already unloaded */ }
             setSound(null);
         }
         setIsPlaying(false);
-        // setCurrentAyahIndex(null); // Gecikmeli sıfırlama yapma, anlık geçiş olsun
     };
 
     const playAyah = async (index: number) => {
@@ -116,13 +120,26 @@ export default function QuranDetailScreen() {
             // Eğer aynı ayete tıklandıysa durdur/devam et
             if (currentAyahIndex === index) {
                 if (isPlaying) {
-                    await sound?.pauseAsync();
+                    try {
+                        const status = await sound?.getStatusAsync();
+                        if (status?.isLoaded) {
+                            await sound?.pauseAsync();
+                        }
+                    } catch (e) { /* ignore */ }
                     setIsPlaying(false);
                 } else if (sound) {
-                    await sound.playAsync();
-                    setIsPlaying(true);
+                    try {
+                        const status = await sound.getStatusAsync();
+                        if (status.isLoaded) {
+                            await sound.playAsync();
+                            setIsPlaying(true);
+                        } else {
+                            startNewAudio(index);
+                        }
+                    } catch (e) {
+                        startNewAudio(index);
+                    }
                 } else {
-                    // Ses yoksa baştan yükle (nadir durum)
                     startNewAudio(index);
                 }
                 return;
@@ -130,14 +147,19 @@ export default function QuranDetailScreen() {
 
             // Farklı ayete geçiş: Önce durdur, UI'ı güncelle, sonra yeni sesi yükle
             if (sound) {
-                await sound.stopAsync();
-                await sound.unloadAsync();
+                try {
+                    const status = await sound.getStatusAsync();
+                    if (status.isLoaded) {
+                        await sound.stopAsync();
+                        await sound.unloadAsync();
+                    }
+                } catch (e) { /* already unloaded */ }
                 setSound(null);
             }
 
             // Hızlı UI tepkisi için state'i hemen güncelle
             setCurrentAyahIndex(index);
-            setIsPlaying(true); // Loading sırasında "oynuyor" gibi gösterilebilir veya spinner
+            setIsPlaying(true);
 
             await startNewAudio(index);
 

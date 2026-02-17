@@ -8,11 +8,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Dimensions, FlatList, Keyboard, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
+import { rem, rf, scale, verticalScale } from '../utils/responsive';
 
 const ICON_PATTERN = require('../../assets/icons/pattern.png');
 const { width } = Dimensions.get('window');
 const COLUMN_COUNT = 2;
-const SPACING = 15;
+const SPACING = scale(15);
 const CARD_WIDTH = (width - (SPACING * (COLUMN_COUNT + 1))) / COLUMN_COUNT;
 
 const blurhash =
@@ -34,7 +35,11 @@ export default function RecipesScreen() {
     const searchAnim = useRef(new Animated.Value(0)).current;
     const [searchText, setSearchText] = useState("");
     const [activeFilter, setActiveFilter] = useState("");
+
     const [suggestions, setSuggestions] = useState<string[]>([]);
+
+    // --- FAVORİ FİLTRESİ ---
+    const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
     useEffect(() => {
         loadData();
@@ -103,9 +108,15 @@ export default function RecipesScreen() {
         }
     };
 
-    const filteredRecipes = recipes.filter(recipe =>
-        recipe.title.toLowerCase().includes(activeFilter.toLowerCase())
-    );
+    const toggleFavoritesFilter = () => {
+        setShowFavoritesOnly(!showFavoritesOnly);
+    };
+
+    const filteredRecipes = recipes.filter(recipe => {
+        const matchesSearch = recipe.title.toLowerCase().includes(activeFilter.toLowerCase());
+        const matchesFavorite = showFavoritesOnly ? isFavorite(recipe.id) : true;
+        return matchesSearch && matchesFavorite;
+    });
 
     const renderRecipeCard = ({ item, index }: { item: any, index: number }) => {
         const isFav = isFavorite(item.id);
@@ -216,9 +227,14 @@ export default function RecipesScreen() {
                                     title={translatedTitle}
                                     onLeftPress={() => router.back()}
                                     rightIcon={
-                                        <TouchableOpacity onPress={toggleSearch} style={styles.headerBtn}>
-                                            <Ionicons name={isSearchVisible ? "close" : "search"} size={28} color="#D4AF37" />
-                                        </TouchableOpacity>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <TouchableOpacity onPress={toggleFavoritesFilter} style={[styles.headerBtn, { marginRight: 5 }]}>
+                                                <Ionicons name={showFavoritesOnly ? "heart" : "heart-outline"} size={28} color={showFavoritesOnly ? "#E74C3C" : "#D4AF37"} />
+                                            </TouchableOpacity>
+                                            <TouchableOpacity onPress={toggleSearch} style={styles.headerBtn}>
+                                                <Ionicons name={isSearchVisible ? "close" : "search"} size={28} color="#D4AF37" />
+                                            </TouchableOpacity>
+                                        </View>
                                     }
                                     centerTitle
                                 />
@@ -315,46 +331,46 @@ export default function RecipesScreen() {
 
 const styles = StyleSheet.create({
     backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
-    bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.05 },
+    bgPatternImage: { position: 'absolute', width: scale(300), height: scale(300), opacity: 0.05 },
 
-    headerBtn: { padding: 5 },
+    headerBtn: { padding: rem(5) },
 
     searchWrapper: { overflow: 'hidden' },
-    searchInnerContent: { paddingBottom: 20 },
+    searchInnerContent: { paddingBottom: verticalScale(20) },
     searchContainer: {
-        flexDirection: 'row', alignItems: 'center', marginHorizontal: 15, marginTop: 5, height: 50,
-        justifyContent: 'space-between', marginBottom: 15
+        flexDirection: 'row', alignItems: 'center', marginHorizontal: scale(15), marginTop: verticalScale(5), height: verticalScale(50),
+        justifyContent: 'space-between', marginBottom: verticalScale(15)
     },
     inputWrapper: {
         flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.08)',
-        borderRadius: 25, height: '100%', paddingHorizontal: 15, marginRight: 10,
+        borderRadius: scale(25), height: '100%', paddingHorizontal: scale(15), marginRight: scale(10),
         borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.3)'
     },
-    searchInput: { flex: 1, color: '#fff', fontSize: 16, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', height: '100%' },
-    clearBtn: { padding: 5 },
-    searchBtnRight: { width: 50, height: 50, justifyContent: 'center', alignItems: 'center' },
+    searchInput: { flex: 1, color: '#fff', fontSize: rf(16), fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', height: '100%' },
+    clearBtn: { padding: rem(5) },
+    searchBtnRight: { width: scale(50), height: scale(50), justifyContent: 'center', alignItems: 'center' },
     searchBtnCircle: {
-        width: 44, height: 44, borderRadius: 22, backgroundColor: '#D4AF37',
+        width: scale(44), height: scale(44), borderRadius: scale(22), backgroundColor: '#D4AF37',
         justifyContent: 'center', alignItems: 'center', shadowColor: '#D4AF37', shadowOpacity: 0.4, shadowRadius: 5
     },
 
-    chipsScroll: { paddingLeft: 15 },
-    chipsContainer: { paddingRight: 30, alignItems: 'center' },
+    chipsScroll: { paddingLeft: scale(15) },
+    chipsContainer: { paddingRight: scale(30), alignItems: 'center' },
     chipItem: {
-        paddingHorizontal: 15, paddingVertical: 8, backgroundColor: 'rgba(255,255,255,0.1)',
-        borderRadius: 20, marginRight: 10, borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.2)'
+        paddingHorizontal: scale(15), paddingVertical: verticalScale(8), backgroundColor: 'rgba(255,255,255,0.1)',
+        borderRadius: scale(20), marginRight: scale(10), borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.2)'
     },
-    chipText: { color: 'rgba(255,255,255,0.8)', fontSize: 13, fontWeight: '500' },
+    chipText: { color: 'rgba(255,255,255,0.8)', fontSize: rf(13), fontWeight: '500' },
 
-    infoBarContainer: { marginTop: 5, marginBottom: 10, paddingHorizontal: 20 },
-    infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-    infoText: { color: 'rgba(255,255,255,0.6)', fontSize: 14, marginLeft: 8, fontStyle: 'italic', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+    infoBarContainer: { marginTop: verticalScale(5), marginBottom: verticalScale(10), paddingHorizontal: scale(20) },
+    infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: verticalScale(10) },
+    infoText: { color: 'rgba(255,255,255,0.6)', fontSize: rf(14), marginLeft: scale(8), fontStyle: 'italic', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
     separator: { height: 1, backgroundColor: 'rgba(212, 175, 55, 0.3)', width: '40%' },
 
     loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    loadingText: { color: 'rgba(255,255,255,0.5)', marginTop: 10 },
-    emptyContainer: { padding: 40, alignItems: 'center', marginTop: 20 },
-    emptyText: { color: 'rgba(255,255,255,0.5)', fontSize: 16, textAlign: 'center', marginTop: 10 },
+    loadingText: { color: 'rgba(255,255,255,0.5)', marginTop: verticalScale(10) },
+    emptyContainer: { padding: rem(40), alignItems: 'center', marginTop: verticalScale(20) },
+    emptyText: { color: 'rgba(255,255,255,0.5)', fontSize: rf(16), textAlign: 'center', marginTop: verticalScale(10) },
 
     // --- GRID LAYOUT ---
     columnWrapper: {
@@ -363,7 +379,7 @@ const styles = StyleSheet.create({
     cardContainer: {
         width: CARD_WIDTH,
         backgroundColor: '#1E2A32',
-        borderRadius: 16,
+        borderRadius: scale(16),
         overflow: 'hidden',
         // Shadow for iOS
         shadowColor: "#000",
@@ -376,7 +392,7 @@ const styles = StyleSheet.create({
         borderColor: 'rgba(255,255,255,0.05)'
     },
     imageWrapper: {
-        height: 140,
+        height: verticalScale(140),
         width: '100%',
         position: 'relative'
     },
@@ -386,22 +402,22 @@ const styles = StyleSheet.create({
     },
     likeBadge: {
         position: 'absolute',
-        top: 8,
-        right: 8,
+        top: verticalScale(8),
+        right: scale(8),
         backgroundColor: 'rgba(0,0,0,0.6)',
-        padding: 6,
-        borderRadius: 50,
+        padding: rem(6),
+        borderRadius: scale(50),
     },
     cardContent: {
-        padding: 12,
+        padding: rem(12),
     },
     cardTitle: {
         color: '#fff',
-        fontSize: 15,
+        fontSize: rf(15),
         fontWeight: 'bold',
         fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-        marginBottom: 8,
-        height: 40 // Sabit yükseklik, 2 satır için
+        marginBottom: verticalScale(8),
+        height: verticalScale(40) // Sabit yükseklik, 2 satır için
     },
     cardFooter: {
         flexDirection: 'row',
@@ -411,10 +427,10 @@ const styles = StyleSheet.create({
     timeTag: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4
+        gap: scale(4)
     },
     timeText: {
         color: '#ccc',
-        fontSize: 12
+        fontSize: rf(12)
     }
 });

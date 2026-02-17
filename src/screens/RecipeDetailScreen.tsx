@@ -100,8 +100,8 @@ export default function RecipeDetailScreen() {
                     >
                         <Ionicons
                             name={isFav ? "heart" : "heart-outline"}
-                            size={28}
-                            color={isFav ? "#E74C3C" : "#fff"}
+                            size={22}
+                            color={isFav ? "#E74C3C" : "#D4AF37"}
                         />
                     </TouchableOpacity>
                 </View>
@@ -171,12 +171,12 @@ const styles = StyleSheet.create({
     },
     favButton: {
         position: 'absolute',
-        bottom: -25, // İçeriğin üstünde yüzmesi için
+        bottom: -22, // İçeriğin üstünde yüzmesi için
         right: 30,
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: '#1E2A32',
+        width: 35,
+        height: 35,
+        borderRadius: 22,
+        backgroundColor: 'transparent', // Light gray transparent
         justifyContent: 'center',
         alignItems: 'center',
         elevation: 10,
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.5,
         shadowRadius: 8,
         borderWidth: 1,
-        borderColor: 'rgba(212, 175, 55, 0.3)',
+        borderColor: 'rgba(255, 255, 255, 0.1)', // Subtler border
         zIndex: 50
     },
 

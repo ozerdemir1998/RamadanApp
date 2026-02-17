@@ -76,7 +76,27 @@ export default function MediaPlayerScreen() {
         setTextLoading(false);
 
       } else {
-        // AYET VE HADİS İÇİN FIREBASE
+        // --- CUSTOM VERSE CHECK (YENİ) ---
+        if (params.surah && params.ayah) {
+          const customData: DailyStory = {
+            id: `custom-${params.surah}-${params.ayah}`,
+            type: 'ayet',
+            title: (params.title as string) || 'Özel Ayet',
+            subTitle: (params.subTitle as string) || `${params.surah}. Sure, ${params.ayah}. Ayet`,
+            content: (params.content as string) || '...',
+            contentAR: (params.contentAR as string) || '',
+            surah: Number(params.surah),
+            ayah: Number(params.ayah)
+          };
+
+          setData(customData);
+          setTextContent({ tr: customData.content, ar: customData.contentAR || "" });
+          // Fetch audio for this specific verse
+          initializeAyetData(Number(params.surah), Number(params.ayah), customData.contentAR);
+          return;
+        }
+
+        // AYET VE HADİS İÇİN FIREBASE (Mevcut Mantık)
         const stories = await fetchDailyContent();
         const currentStory = stories.find(s => s.type === contentType);
 
@@ -263,7 +283,7 @@ export default function MediaPlayerScreen() {
     if (contentType === 'hadis') return false;
 
     if (contentType === 'ayet') {
-      // Ayet için sadece Arapça modunda player göster
+      // Türkçe ayet için Player YOK (Seslendirme yok), Sadece Arapça
       return language === 'AR';
     }
 
@@ -334,9 +354,18 @@ export default function MediaPlayerScreen() {
                 <Text style={{ color: '#aaa', marginTop: 10, textAlign: 'center' }}>Yükleniyor...</Text>
               </View>
             ) : (
-              <Text style={language === 'TR' ? styles.textContent : styles.arabicText}>
-                {language === 'TR' ? textContent.tr : textContent.ar}
-              </Text>
+              <View>
+                {/* AYET İSE ARAPÇA HER ZAMAN GÖZÜKSÜN (OPSİYONEL) VEYA DİL SEÇİMİNE GÖRE */}
+                {/* Kullanıcı isteği: "Görüntü olarak daha kullanışlı" -> Arapça üstte, Türkçe altta olabilir mi?
+                        Mevcut yapı dil değiştirme üzerine, bunu koruyalım ama Player bağımsız olsun.
+                    */}
+                <Text style={[
+                  language === 'TR' ? styles.textContent : styles.arabicText,
+                  { opacity: isPlaying ? 0.8 : 1 } // Çalarken hafif transparan
+                ]}>
+                  {language === 'TR' ? textContent.tr : textContent.ar}
+                </Text>
+              </View>
             )}
           </View>
 
@@ -360,8 +389,18 @@ export default function MediaPlayerScreen() {
                 <Text style={styles.timeText}>{formatTime(duration)}</Text>
               </View>
 
-              {/* PLAY BUTONU */}
-              <View style={{ alignItems: 'center', marginTop: 10 }}>
+              {/* PLAY BUTONU & KONTROLLER */}
+              <View style={styles.controlsRow}>
+                {/* Geri Sar Button */}
+                <TouchableOpacity
+                  style={styles.seekButton}
+                  onPress={() => onSeek(Math.max(0, position - 10000))}
+                  disabled={!audioReady}
+                >
+                  <MaterialCommunityIcons name="rewind-10" size={32} color="rgba(255,255,255,0.7)" />
+                </TouchableOpacity>
+
+                {/* Play/Pause Button */}
                 <TouchableOpacity
                   style={[
                     styles.playButton,
@@ -383,11 +422,14 @@ export default function MediaPlayerScreen() {
                   )}
                 </TouchableOpacity>
 
-                <Text style={styles.playHint}>
-                  {!audioReady ? "Ses Hazırlanıyor..." :
-                    audioBuffering ? "Yükleniyor..." :
-                      isPlaying ? "Durdur" : "Dinle"}
-                </Text>
+                {/* İleri Sar Button */}
+                <TouchableOpacity
+                  style={styles.seekButton}
+                  onPress={() => onSeek(Math.min(duration, position + 10000))}
+                  disabled={!audioReady}
+                >
+                  <MaterialCommunityIcons name="fast-forward-10" size={32} color="rgba(255,255,255,0.7)" />
+                </TouchableOpacity>
               </View>
             </View>
           )}
@@ -460,6 +502,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#D4AF37',
     justifyContent: 'center', alignItems: 'center',
     shadowColor: '#D4AF37', shadowOpacity: 0.5, shadowRadius: 15, elevation: 10
+  },
+  controlsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 30, // Buttonlar arası boşluk
+    marginTop: 10
+  },
+  seekButton: {
+    padding: 10,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)'
   },
   pauseButton: { backgroundColor: '#FFD700', opacity: 0.9 },
   disabledButton: { backgroundColor: 'rgba(255,255,255,0.1)', shadowOpacity: 0 },

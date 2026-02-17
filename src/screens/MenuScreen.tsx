@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
+import { rem, rf, scale, verticalScale } from '../utils/responsive';
 
 // --- EKRANLAR ---
 import AbdestVisualScreen from './AbdestVisualScreen';
@@ -208,8 +209,13 @@ export default function MenuScreen() {
               <Ionicons name="chevron-forward" size={24} color="#D4AF37" />
             </TouchableOpacity>
 
-            <View style={styles.separator} />
 
+
+          </View>
+
+          {/* 1.5. KİŞİSEL GRUBU */}
+          <Text style={styles.sectionTitle}>Kişisel</Text>
+          <View style={styles.cardContainer}>
             {/* Favori Tariflerim */}
             <TouchableOpacity
               style={styles.menuItem}
@@ -225,7 +231,6 @@ export default function MenuScreen() {
               </View>
               <Ionicons name="chevron-forward" size={24} color="#D4AF37" />
             </TouchableOpacity>
-
           </View>
 
           {/* 2. AYARLAR GRUBU */}
@@ -296,18 +301,18 @@ const styles = StyleSheet.create({
 
   // ARKAPLAN
   backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
-  bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.05, tintColor: '#D4AF37', resizeMode: 'contain' },
+  bgPatternImage: { position: 'absolute', width: scale(300), height: scale(300), opacity: 0.05, tintColor: '#D4AF37', resizeMode: 'contain' },
 
   // HEADER
   // headerRow etc removed
 
-  sectionTitle: { fontSize: 14, fontWeight: 'bold', color: '#D4AF37', marginBottom: 10, marginLeft: 25, marginTop: 20, textTransform: 'uppercase', letterSpacing: 1 },
+  sectionTitle: { fontSize: rf(14), fontWeight: 'bold', color: '#D4AF37', marginBottom: verticalScale(10), marginLeft: scale(25), marginTop: verticalScale(20), textTransform: 'uppercase', letterSpacing: 1 },
 
   // KART YAPISI
   cardContainer: {
-    marginHorizontal: 20,
+    marginHorizontal: scale(20),
     backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 16,
+    borderRadius: scale(16),
     borderWidth: 1,
     borderColor: 'rgba(212, 175, 55, 0.1)',
     overflow: 'hidden'
@@ -315,23 +320,23 @@ const styles = StyleSheet.create({
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: rem(16),
   },
   iconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: scale(40),
+    height: scale(40),
+    borderRadius: scale(12),
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15,
+    marginRight: scale(15),
   },
   menuTextContent: { flex: 1 },
-  menuTitle: { fontSize: 16, fontWeight: '600', color: '#fff', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
-  menuSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 2 },
+  menuTitle: { fontSize: rf(16), fontWeight: '600', color: '#fff', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+  menuSubtitle: { fontSize: rf(12), color: 'rgba(255,255,255,0.5)', marginTop: 2 },
 
-  separator: { height: 1, backgroundColor: 'rgba(255,255,255,0.05)', marginLeft: 70 },
+  separator: { height: 1, backgroundColor: 'rgba(255,255,255,0.05)', marginLeft: scale(70) },
 
-  versionText: { textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 12, marginTop: 30 },
+  versionText: { textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: rf(12), marginTop: verticalScale(30) },
 
   // MODAL CLOSE BUTTON
   closeButton: {

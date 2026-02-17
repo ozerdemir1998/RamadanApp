@@ -6,6 +6,7 @@ import { AppState, Dimensions, Image, Platform, ScrollView, StyleSheet, Text, To
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
 import { DailyStory, fetchDailyContent } from '../services/contentService';
+import { rem, rf, scale, verticalScale } from '../utils/responsive';
 
 const { width } = Dimensions.get('window');
 const ICON_PATTERN = require('../../assets/icons/ramadan.png');
@@ -119,7 +120,7 @@ export default function LifeScreen() {
 
             {/* Günün Ayeti */}
             <TouchableOpacity
-              style={[styles.spiritualCard, { height: 110 }]}
+              style={[styles.spiritualCard, { height: verticalScale(110) }]}
               activeOpacity={0.9}
               onPress={() => openMedia('ayet')}
             >
@@ -360,12 +361,12 @@ const styles = StyleSheet.create({
   backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
   bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.1, tintColor: '#D4AF37', resizeMode: 'contain' },
 
-  sectionContainer: { marginBottom: 30, paddingHorizontal: 20 },
+  sectionContainer: { marginBottom: verticalScale(30), paddingHorizontal: scale(20) },
 
   // --- SPIRITUAL CARDS ---
   spiritualCard: {
-    marginBottom: 12,
-    borderRadius: 16,
+    marginBottom: verticalScale(12),
+    borderRadius: scale(16),
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
@@ -374,7 +375,7 @@ const styles = StyleSheet.create({
   },
   spiritualGradient: {
     flex: 1,
-    padding: 20,
+    padding: rem(20),
     justifyContent: 'center',
     position: 'relative' // bgIcon için
   },
@@ -382,47 +383,47 @@ const styles = StyleSheet.create({
   // Large Card Content
   cardContent: { flexDirection: 'row', alignItems: 'center' },
   iconContainer: {
-    width: 50, height: 50, borderRadius: 25,
+    width: scale(50), height: scale(50), borderRadius: scale(25),
     backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'center', alignItems: 'center',
-    marginRight: 15
+    marginRight: scale(15)
   },
   textContent: { flex: 1 },
-  cardTitle: { color: '#FFD700', fontSize: 18, fontWeight: 'bold', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
-  cardSubtitle: { color: 'rgba(255,255,255,0.7)', fontSize: 13, marginTop: 4, fontStyle: 'italic' },
+  cardTitle: { color: '#FFD700', fontSize: rf(18), fontWeight: 'bold', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+  cardSubtitle: { color: 'rgba(255,255,255,0.7)', fontSize: rf(13), marginTop: verticalScale(4), fontStyle: 'italic' },
   arrowContainer: {
-    width: 30, height: 30, borderRadius: 15,
+    width: scale(30), height: scale(30), borderRadius: scale(15),
     backgroundColor: 'rgba(255,255,255,0.1)',
     justifyContent: 'center', alignItems: 'center',
-    marginLeft: 10
+    marginLeft: scale(10)
   },
 
   // Background Icon Watermark
-  bgIcon: { position: 'absolute', right: -20, bottom: -20, opacity: 0.1 },
-  bgIconRight: { position: 'absolute', right: -10, bottom: -10, opacity: 0.1 },
+  bgIcon: { position: 'absolute', right: scale(-20), bottom: verticalScale(-20), opacity: 0.1 },
+  bgIconRight: { position: 'absolute', right: scale(-10), bottom: verticalScale(-10), opacity: 0.1 },
 
   // Row / Half Cards
   rowContainer: { flexDirection: 'row', justifyContent: 'space-between' },
-  halfCard: { width: (width - 50) / 2, height: 130, marginBottom: 0 },
+  halfCard: { width: (width - scale(50)) / 2, height: verticalScale(130), marginBottom: 0 },
 
-  cardTitleSmall: { color: '#FFF', fontSize: 16, fontWeight: 'bold', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
-  cardSubtitleSmall: { color: 'rgba(255,255,255,0.6)', fontSize: 12, marginTop: 2 },
+  cardTitleSmall: { color: '#FFF', fontSize: rf(16), fontWeight: 'bold', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+  cardSubtitleSmall: { color: 'rgba(255,255,255,0.6)', fontSize: rf(12), marginTop: verticalScale(2) },
 
   // --- KATEGORİ GRID ---
-  sectionHeader: { paddingHorizontal: 20, marginBottom: 15, marginTop: 10 },
-  sectionTitle: { fontSize: 18, color: '#D4AF37', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+  sectionHeader: { paddingHorizontal: scale(20), marginBottom: verticalScale(15), marginTop: verticalScale(10) },
+  sectionTitle: { fontSize: rf(18), color: '#D4AF37', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
 
   categoryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 20,
+    paddingHorizontal: scale(20),
     justifyContent: 'space-between'
   },
   categoryCard: {
-    width: (width - 55) / 2, // 2 sütun, ortadaki boşluk (15) ve paddingler (40) hesaplandı
+    width: (width - scale(55)) / 2, // 2 sütun, ortadaki boşluk (15) ve paddingler (40) hesaplandı
     aspectRatio: 1.1, // Kareye yakın
-    marginBottom: 15,
-    borderRadius: 16,
+    marginBottom: verticalScale(15),
+    borderRadius: scale(16),
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
     overflow: 'hidden'
@@ -431,18 +432,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 10
+    padding: rem(10)
   },
   catIconBox: {
-    marginBottom: 10,
-    width: 50, height: 50,
-    borderRadius: 25,
+    marginBottom: verticalScale(10),
+    width: scale(50), height: scale(50),
+    borderRadius: scale(25),
     backgroundColor: 'rgba(212, 175, 55, 0.1)',
     justifyContent: 'center', alignItems: 'center'
   },
   catTitle: {
     color: '#fff',
-    fontSize: 15,
+    fontSize: rf(15),
     fontWeight: 'bold',
     textAlign: 'center',
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif'

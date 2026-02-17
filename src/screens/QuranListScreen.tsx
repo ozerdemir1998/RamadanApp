@@ -1,4 +1,4 @@
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -15,7 +15,7 @@ export default function QuranListScreen() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
 
-    const [viewMode, setViewMode] = useState<'list' | 'page'>('list');
+
 
     useEffect(() => {
         loadSurahs();
@@ -65,7 +65,7 @@ export default function QuranListScreen() {
     const renderSurahItem = ({ item }: { item: Surah }) => (
         <TouchableOpacity
             style={styles.card}
-            onPress={() => router.push({ pathname: '/quran-detail', params: { surahId: item.number, surahName: item.englishName, initialMode: viewMode } })}
+            onPress={() => router.push({ pathname: '/quran-detail', params: { surahId: item.number, surahName: item.englishName } })}
             activeOpacity={0.7}
         >
             <View style={styles.cardContent}>
@@ -108,30 +108,6 @@ export default function QuranListScreen() {
                             <ScreenHeader
                                 title="Kuran-ı Kerim"
                                 leftIcon="none"
-                                rightIcon={
-                                    <View style={styles.iconToggleContainer}>
-                                        <TouchableOpacity
-                                            style={[styles.iconButton, viewMode === 'list' && styles.activeIconButton]}
-                                            onPress={() => setViewMode('list')}
-                                        >
-                                            <MaterialCommunityIcons
-                                                name="format-list-bulleted"
-                                                size={24}
-                                                color={viewMode === 'list' ? '#0F2027' : 'rgba(255,255,255,0.5)'}
-                                            />
-                                        </TouchableOpacity>
-                                        <TouchableOpacity
-                                            style={[styles.iconButton, viewMode === 'page' && styles.activeIconButton]}
-                                            onPress={() => setViewMode('page')}
-                                        >
-                                            <MaterialCommunityIcons
-                                                name="book-open-page-variant"
-                                                size={24}
-                                                color={viewMode === 'page' ? '#0F2027' : 'rgba(255,255,255,0.5)'}
-                                            />
-                                        </TouchableOpacity>
-                                    </View>
-                                }
                             />
 
                             {/* SEARCH BAR */}
@@ -164,25 +140,7 @@ const styles = StyleSheet.create({
     headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#D4AF37', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
     headerSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 2 },
 
-    iconToggleContainer: {
-        flexDirection: 'row',
-        backgroundColor: 'rgba(255,255,255,0.1)',
-        borderRadius: 20,
-        padding: 4,
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)'
-    },
-    iconButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 18,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginLeft: 2
-    },
-    activeIconButton: {
-        backgroundColor: '#D4AF37'
-    },
+
 
     searchContainer: {
         marginHorizontal: 20,

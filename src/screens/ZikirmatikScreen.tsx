@@ -5,9 +5,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
 import { Alert, Dimensions, FlatList, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { runOnJS } from 'react-native-reanimated';
+import Animated, { Easing, FadeIn, FadeOut, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
+import { rem, rf, scale, verticalScale, wp } from '../utils/responsive';
 
 const { width } = Dimensions.get('window');
 const ICON_PATTERN = require('../../assets/icons/pattern.png');
@@ -38,6 +39,26 @@ const ACTIVE_ZIKIR_KEY = '@zikirmatik_active_id_v1';
 export default function ZikirmatikScreen({ onClose }: { onClose?: () => void }) {
   // GÖRÜNÜM MODU: SAYAÇ varsayılan
   const [viewMode, setViewMode] = useState<'LIST' | 'COUNTER'>('COUNTER');
+  const listTranslateY = useSharedValue(Dimensions.get('window').height);
+
+  const openList = () => {
+    setViewMode('LIST');
+    listTranslateY.value = withTiming(0, {
+      duration: 500,
+      easing: Easing.out(Easing.cubic)
+    });
+  };
+
+  const closeList = () => {
+    listTranslateY.value = withTiming(Dimensions.get('window').height, {
+      duration: 500,
+      easing: Easing.in(Easing.cubic)
+    }, (finished) => {
+      if (finished) {
+        runOnJS(setViewMode)('COUNTER');
+      }
+    });
+  };
 
   // VERİLER
   const [zikirs, setZikirs] = useState<Zikir[]>([]);
@@ -99,7 +120,10 @@ export default function ZikirmatikScreen({ onClose }: { onClose?: () => void }) 
     setActiveZikirId(id);
     await AsyncStorage.setItem(ACTIVE_ZIKIR_KEY, id);
     setSessionCount(0);
-    setViewMode('COUNTER');
+    setActiveZikirId(id);
+    await AsyncStorage.setItem(ACTIVE_ZIKIR_KEY, id);
+    setSessionCount(0);
+    closeList();
   };
 
   const handleCount = () => {
@@ -161,7 +185,11 @@ export default function ZikirmatikScreen({ onClose }: { onClose?: () => void }) 
     const activeZikir = zikirs.find(z => z.id === activeZikirId);
 
     return (
-      <View style={{ flex: 1, alignItems: 'center', width: '100%' }}>
+      <Animated.View
+        entering={FadeIn.duration(300)}
+        exiting={FadeOut.duration(300)}
+        style={{ flex: 1, alignItems: 'center', width: '100%' }}
+      >
         {/* YENİ HEADER: Sadece Aşağı Ok */}
         {/* Header - Sol: Kapat */}
         <View style={{ width: '100%', marginBottom: 10, marginTop: 20, paddingHorizontal: 20 }}>
@@ -228,7 +256,7 @@ export default function ZikirmatikScreen({ onClose }: { onClose?: () => void }) 
         {/* ZİKİR SEÇİM ÇUBUĞU (YENİ) */}
         <TouchableOpacity
           style={styles.selectionBar}
-          onPress={() => setViewMode('LIST')}
+          onPress={openList}
           activeOpacity={0.8}
         >
           <View style={styles.selectionBarIcon}>
@@ -242,48 +270,68 @@ export default function ZikirmatikScreen({ onClose }: { onClose?: () => void }) 
         </TouchableOpacity>
 
         <Text style={styles.hint}>Saymak için butona, kaydetmek için diske basın</Text>
-      </View>
+      </Animated.View>
     );
   };
 
   // --- RENDER: LİSTE MODU ---
   const renderList = () => {
-    return (
-      <View style={{ flex: 1, width: '100%' }}>
-        <View style={{ marginTop: 20, marginHorizontal: 20 }}>
-          <ScreenHeader
-            title="Zikirlerim"
-            onLeftPress={() => setViewMode('COUNTER')} // Geri dön counter'a
-            leftIcon="back"
-            centerTitle
-          />
-        </View>
+    const animatedStyle = useAnimatedStyle(() => {
+      return {
+        transform: [{ translateY: listTranslateY.value }]
+      };
+    });
 
-        <FlatList
-          data={zikirs}
-          keyExtractor={item => item.id}
-          contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <TouchableOpacity style={[styles.zikirItem, activeZikirId === item.id && styles.activeZikirItem]} onPress={() => openCounter(item.id)} activeOpacity={0.7}>
-              <View style={styles.zikirIconBox}>
-                <Text style={styles.zikirInitial}>{item.title.charAt(0)}</Text>
-              </View>
-              <View style={styles.zikirInfo}>
-                <Text style={styles.zikirTitle}>{item.title}</Text>
-                <Text style={styles.zikirCount}>Toplam: <Text style={{ color: '#D4AF37', fontWeight: 'bold' }}>{item.count}</Text></Text>
-              </View>
-              {activeZikirId === item.id && (
-                <View style={styles.activeIndicator}>
-                  <Ionicons name="checkmark-circle" size={24} color="#D4AF37" />
-                </View>
+    return (
+      <Animated.View
+        style={[
+          StyleSheet.absoluteFill,
+          { zIndex: 10, backgroundColor: '#0F2027' },
+          animatedStyle
+        ]}
+      >
+        <LinearGradient
+          colors={['#0F2027', '#203A43', '#2C5364']}
+          style={{ flex: 1, alignItems: 'center' }}
+        >
+          <SafeAreaView style={{ flex: 1, width: '100%' }} edges={['top']}>
+            <View style={{ marginTop: 20, marginHorizontal: 20 }}>
+              <ScreenHeader
+                title="Zikirlerim"
+                onLeftPress={closeList}
+                leftIcon="back"
+                centerTitle
+              />
+            </View>
+
+            <FlatList
+              data={zikirs}
+              keyExtractor={item => item.id}
+              contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <TouchableOpacity style={[styles.zikirItem, activeZikirId === item.id && styles.activeZikirItem]} onPress={() => openCounter(item.id)} activeOpacity={0.7}>
+                  <View style={styles.zikirIconBox}>
+                    <Text style={styles.zikirInitial}>{item.title.charAt(0)}</Text>
+                  </View>
+                  <View style={styles.zikirInfo}>
+                    <Text style={styles.zikirTitle}>{item.title}</Text>
+                    <Text style={styles.zikirCount}>Toplam: <Text style={{ color: '#D4AF37', fontWeight: 'bold' }}>{item.count}</Text></Text>
+                  </View>
+                  {activeZikirId === item.id && (
+                    <View style={styles.activeIndicator}>
+                      <Ionicons name="checkmark-circle" size={24} color="#D4AF37" />
+                    </View>
+                  )}
+                </TouchableOpacity>
               )}
-            </TouchableOpacity>
-          )}
-        />
-      </View>
+            />
+          </SafeAreaView>
+        </LinearGradient>
+      </Animated.View>
     );
   }
+
 
   return (
     <GestureDetector gesture={panGesture}>
@@ -297,7 +345,8 @@ export default function ZikirmatikScreen({ onClose }: { onClose?: () => void }) 
         </View>
 
         <SafeAreaView style={{ flex: 1, alignItems: 'center', width: '100%' }} edges={['top']}>
-          {viewMode === 'LIST' ? renderList() : renderCounter()}
+          {renderCounter()}
+          {renderList()}
         </SafeAreaView>
       </LinearGradient>
     </GestureDetector>
@@ -309,7 +358,7 @@ const styles = StyleSheet.create({
 
   // ARKAPLAN DESENİ
   backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
-  bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.05, tintColor: '#D4AF37', resizeMode: 'contain' },
+  bgPatternImage: { position: 'absolute', width: scale(300), height: scale(300), opacity: 0.05, tintColor: '#D4AF37', resizeMode: 'contain' },
 
   // HEADER ICON
   iconButton: { padding: 5 },
@@ -321,9 +370,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 16,
-    marginBottom: 12,
-    padding: 16,
+    borderRadius: scale(16),
+    marginBottom: verticalScale(12),
+    padding: rem(16),
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)'
   },
@@ -332,49 +381,51 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(212, 175, 55, 0.05)'
   },
   zikirIconBox: {
-    width: 50, height: 50, borderRadius: 25,
+    width: scale(50), height: scale(50), borderRadius: scale(25),
     backgroundColor: 'rgba(212, 175, 55, 0.1)',
     justifyContent: 'center', alignItems: 'center',
-    marginRight: 15,
+    marginRight: scale(15),
     borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.3)'
   },
-  zikirInitial: { fontSize: 24, fontWeight: 'bold', color: '#D4AF37' },
+  zikirInitial: { fontSize: rf(24), fontWeight: 'bold', color: '#D4AF37' },
   zikirInfo: { flex: 1 },
-  zikirTitle: { fontSize: 16, fontWeight: 'bold', color: '#fff', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', marginBottom: 4 },
-  zikirCount: { fontSize: 14, color: 'rgba(255,255,255,0.6)' },
+  zikirTitle: { fontSize: rf(16), fontWeight: 'bold', color: '#fff', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', marginBottom: verticalScale(4) },
+  zikirCount: { fontSize: rf(14), color: 'rgba(255,255,255,0.6)' },
   playButton: {
-    width: 40, height: 40, borderRadius: 20,
+    width: scale(40), height: scale(40), borderRadius: scale(20),
     backgroundColor: 'rgba(255,255,255,0.1)',
     justifyContent: 'center', alignItems: 'center'
   },
-  activeIndicator: { marginLeft: 10 },
+  activeIndicator: { marginLeft: scale(10) },
 
 
   // --- SAYAÇ GÖVDE ---
   bodyContainer: {
-    width: width * 0.85,
-    height: width * 1.25, // Biraz daha uzun
+    width: wp(85),
+    // height: wp(85) * 1.25, // REMOVED fixed aspect ratio dependency
+    minHeight: verticalScale(450), // Ensure minimum vertical space
+    maxHeight: verticalScale(600), // Prevent it from being too tall on huge screens
     backgroundColor: 'rgba(255,255,255,0.05)', // Hafif cam efekti
-    borderRadius: 50,
+    borderRadius: scale(50),
     alignItems: 'center',
-    padding: 20,
+    padding: rem(20),
     borderWidth: 2,
     borderColor: 'rgba(212, 175, 55, 0.3)', // Altın Çerçeve
     justifyContent: 'space-between',
-    paddingVertical: 30
+    paddingVertical: verticalScale(20)
   },
 
   // EKRAN
   screenFrame: {
     width: '100%',
     alignItems: 'center',
-    marginBottom: 10
+    marginBottom: verticalScale(10)
   },
   screenInner: {
     width: '100%',
-    height: 110,
+    height: verticalScale(90), // Azaltıldı (110 -> 90)
     backgroundColor: '#000', // Tam Siyah (OLED hissi)
-    borderRadius: 15,
+    borderRadius: scale(15),
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
@@ -385,7 +436,7 @@ const styles = StyleSheet.create({
     elevation: 10
   },
   countText: {
-    fontSize: 70,
+    fontSize: rf(60), // Azaltıldı (70 -> 60)
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
     color: '#D4AF37',
     textShadowColor: 'rgba(212, 175, 55, 0.8)', // Neon Glow
@@ -394,7 +445,7 @@ const styles = StyleSheet.create({
   },
   screenLabel: {
     color: 'rgba(255,255,255,0.4)',
-    fontSize: 11,
+    fontSize: rf(11),
     letterSpacing: 1,
     fontWeight: 'bold'
   },
@@ -403,17 +454,17 @@ const styles = StyleSheet.create({
   controls: { alignItems: 'center', justifyContent: 'center', flex: 1 },
 
   buttonRing: {
-    width: 200, height: 200,
-    borderRadius: 100,
+    width: scale(180), height: scale(180), // Azaltıldı (200 -> 180)
+    borderRadius: scale(90),
     borderWidth: 1,
     borderColor: 'rgba(212, 175, 55, 0.2)',
     justifyContent: 'center', alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.2)'
   },
   bigButton: {
-    width: 170,
-    height: 170,
-    borderRadius: 85,
+    width: scale(150), // Azaltıldı (170 -> 150)
+    height: scale(150),
+    borderRadius: scale(75),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.5,
@@ -422,15 +473,15 @@ const styles = StyleSheet.create({
   },
   buttonGradient: {
     flex: 1,
-    borderRadius: 85,
+    borderRadius: scale(75),
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
     borderColor: '#FFD700'
   },
   innerButtonShine: {
-    width: 140, height: 140,
-    borderRadius: 70,
+    width: scale(120), height: scale(120), // Azaltıldı (140 -> 120)
+    borderRadius: scale(60),
     borderWidth: 2,
     borderColor: 'rgba(255,255,255,0.2)',
     backgroundColor: 'transparent'
@@ -450,10 +501,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: 'rgba(212, 175, 55, 0.1)',
     width: '100%',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 12,
-    marginBottom: 15,
+    paddingVertical: verticalScale(10),
+    paddingHorizontal: scale(15),
+    borderRadius: scale(12),
+    marginBottom: verticalScale(15),
     borderWidth: 1,
     borderColor: 'rgba(212, 175, 55, 0.2)'
   },
@@ -462,30 +513,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.08)',
-    width: width * 0.85,
-    padding: 12,
-    borderRadius: 16,
-    marginTop: 20,
+    width: wp(85),
+    padding: rem(12),
+    borderRadius: scale(16),
+    marginTop: verticalScale(20),
     borderWidth: 1,
     borderColor: 'rgba(212, 175, 55, 0.3)'
   },
   selectionBarIcon: {
-    width: 36, height: 36, borderRadius: 12,
+    width: scale(36), height: scale(36), borderRadius: scale(12),
     backgroundColor: '#D4AF37',
     justifyContent: 'center', alignItems: 'center',
-    marginRight: 15
+    marginRight: scale(15)
   },
-  selectionBarLabel: { fontSize: 10, color: 'rgba(255,255,255,0.5)', letterSpacing: 1, marginBottom: 2 },
-  selectionBarTitle: { fontSize: 15, fontWeight: 'bold', color: '#fff', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+  selectionBarLabel: { fontSize: rf(10), color: 'rgba(255,255,255,0.5)', letterSpacing: 1, marginBottom: 2 },
+  selectionBarTitle: { fontSize: rf(15), fontWeight: 'bold', color: '#fff', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
 
   listButtonText: {
-    fontSize: 12, fontWeight: 'bold', color: '#D4AF37', letterSpacing: 1
+    fontSize: rf(12), fontWeight: 'bold', color: '#D4AF37', letterSpacing: 1
   },
 
   smallCircleButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: scale(50),
+    height: scale(50),
+    borderRadius: scale(25),
     backgroundColor: 'rgba(255,255,255,0.1)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -493,5 +544,5 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(212, 175, 55, 0.3)'
   },
 
-  hint: { marginTop: 20, color: 'rgba(255,255,255,0.4)', fontSize: 13, textAlign: 'center' }
+  hint: { marginTop: verticalScale(20), color: 'rgba(255,255,255,0.4)', fontSize: rf(13), textAlign: 'center' }
 });
