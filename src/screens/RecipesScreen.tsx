@@ -161,8 +161,18 @@ export default function RecipesScreen() {
             <Stack.Screen options={{ headerShown: false }} />
 
             <View style={styles.backgroundPatternContainer} pointerEvents="none">
-                <Image source={ICON_PATTERN} style={[styles.bgPatternImage, { left: -150 }]} />
-                <Image source={ICON_PATTERN} style={[styles.bgPatternImage, { right: -150 }]} />
+                <Image
+                    source={ICON_PATTERN}
+                    style={[styles.bgPatternImage, { left: -150 }]}
+                    contentFit="contain"
+                    tintColor="#D4AF37"
+                />
+                <Image
+                    source={ICON_PATTERN}
+                    style={[styles.bgPatternImage, { right: -150 }]}
+                    contentFit="contain"
+                    tintColor="#D4AF37"
+                />
             </View>
 
             <SafeAreaView style={{ flex: 1 }} edges={['top']}>
@@ -288,7 +298,7 @@ export default function RecipesScreen() {
 
 const styles = StyleSheet.create({
     backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
-    bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.05, tintColor: '#D4AF37', resizeMode: 'contain' },
+    bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.05 },
 
     headerBtn: { padding: 5 },
 
@@ -364,7 +374,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.6)',
         padding: 6,
         borderRadius: 50,
-        backdropFilter: 'blur(10px)' // iOS only mostly
     },
     cardContent: {
         padding: 12,
