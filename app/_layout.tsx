@@ -2,12 +2,22 @@ import { Stack } from "expo-router";
 
 export default function RootLayout() {
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        presentation: 'modal', // iOS ve Android için aşağıdan yukarı açılış
+        animation: 'slide_from_bottom', // Emin olmak için
+      }}
+    >
       {/* (tabs) klasörünü ana ekran olarak yükle ve başlığı gizle */}
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="quran-detail" options={{ headerShown: false }} />
-      <Stack.Screen name="media-player" options={{ headerShown: false }} />
-      <Stack.Screen name="special" options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false, presentation: 'card', animation: 'default' }} />
+      <Stack.Screen name="quran-detail" />
+      <Stack.Screen name="media-player" />
+      <Stack.Screen name="special" />
+      <Stack.Screen name="nafile-list" />
+      <Stack.Screen name="nafile-detail" />
+      <Stack.Screen name="recipes" />
+      <Stack.Screen name="recipe-detail" />
     </Stack>
   );
 }

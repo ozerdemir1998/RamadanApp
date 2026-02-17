@@ -5,6 +5,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, FlatList, Image, Keyboard, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'; // EKLENDİ
+import ScreenHeader from '../components/ScreenHeader';
 
 const ICON_PATTERN = require('../../assets/icons/pattern.png');
 
@@ -135,15 +136,16 @@ export default function RecipesScreen() {
                         ListHeaderComponent={
                             <View>
                                 {/* 1. Üst Başlık */}
-                                <View style={styles.header}>
-                                    <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
-                                        <Ionicons name="arrow-back" size={28} color="#D4AF37" />
-                                    </TouchableOpacity>
-                                    <Text style={styles.headerTitle}>{translatedTitle}</Text>
-                                    <TouchableOpacity onPress={toggleSearch} style={styles.headerBtn}>
-                                        <Ionicons name={isSearchVisible ? "close" : "search"} size={28} color="#D4AF37" />
-                                    </TouchableOpacity>
-                                </View>
+                                <ScreenHeader
+                                    title={translatedTitle}
+                                    onLeftPress={() => router.back()}
+                                    rightIcon={
+                                        <TouchableOpacity onPress={toggleSearch} style={styles.headerBtn}>
+                                            <Ionicons name={isSearchVisible ? "close" : "search"} size={28} color="#D4AF37" />
+                                        </TouchableOpacity>
+                                    }
+                                    centerTitle
+                                />
 
                                 {/* 2. Animasyonlu Arama Kutusu */}
                                 <Animated.View style={[
@@ -263,7 +265,7 @@ export default function RecipesScreen() {
                                         <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
                                         <View style={styles.cardFooter}>
                                             <Text style={styles.cardSubtitle}>Tarifi İncele</Text>
-                                            <MaterialCommunityIcons name="arrow-right" size={20} color="#D4AF37" />
+                                            <Ionicons name="chevron-forward" size={20} color="#D4AF37" />
                                         </View>
                                     </View>
                                 </LinearGradient>
@@ -281,17 +283,7 @@ const styles = StyleSheet.create({
     bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.05, tintColor: '#D4AF37', resizeMode: 'contain' },
 
     // HEADER
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 15,
-        paddingTop: 10,
-        marginBottom: 5,
-        height: 50
-    },
     headerBtn: { padding: 5 },
-    headerTitle: { fontSize: 22, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', color: '#D4AF37', fontWeight: 'bold' },
 
     // ARAMA ALANI
     searchWrapper: { overflow: 'hidden' },

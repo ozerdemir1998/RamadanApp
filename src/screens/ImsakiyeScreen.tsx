@@ -3,6 +3,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import CloseButton from '../components/CloseButton';
+import ScreenHeader from '../components/ScreenHeader';
 import { RAMADAN_DATA, RamadanDay } from '../data/ramadanData';
 import { getRamadanPrayerTimes } from '../services/prayerTimeService';
 
@@ -59,15 +61,11 @@ export default function ImsakiyeScreen() {
       style={{ flex: 1 }}
     >
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
-        <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-
-          {/* --- HEADER --- */}
-          <View style={styles.header}>
-            <View>
-              <Text style={styles.headerTitle}>Ramazan İmsakiyesi</Text>
-              <Text style={styles.headerSubtitle}>Vakitler ve Dualar</Text>
-            </View>
-
+        <ScreenHeader
+          title="İmsakiye"
+          leftIcon="none"
+          noBorder
+          rightIcon={
             <View style={styles.iconToggleContainer}>
               <TouchableOpacity
                 style={[styles.iconButton, viewMode === 'list' && styles.activeIconButton]}
@@ -90,9 +88,13 @@ export default function ImsakiyeScreen() {
                 />
               </TouchableOpacity>
             </View>
-          </View>
+          }
+        />
 
-          <View style={{ height: 20 }} />
+        <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+
+          {/* --- HEADER --- */}
+          {/* HEADER MOVED UP */}
 
           {/* --- İÇERİK --- */}
           {viewMode === 'list' ? (
@@ -135,7 +137,7 @@ export default function ImsakiyeScreen() {
                     <Text style={[styles.timeText, styles.iftarText, isKadir && styles.kadirText]}>{item.times.aksam}</Text>
                     <Text style={[styles.timeText, isKadir && styles.kadirText]}>{item.times.yatsi}</Text>
                     <View style={styles.chevronCol}>
-                      <Ionicons name="chevron-forward" size={14} color={isKadir ? "#D4AF37" : "rgba(255,255,255,0.3)"} />
+                      <Ionicons name="chevron-forward" size={14} color="#D4AF37" />
                     </View>
                   </TouchableOpacity>
                 );
@@ -201,9 +203,7 @@ export default function ImsakiyeScreen() {
                     <Text style={{ color: '#D4AF37', fontSize: 12, fontWeight: 'bold' }}>✨ Kadir Gecesi ✨</Text>
                   )}
                 </View>
-                <TouchableOpacity onPress={() => setSelectedDay(null)} style={styles.closeButton}>
-                  <Ionicons name="close" size={24} color="#fff" />
-                </TouchableOpacity>
+                <CloseButton onPress={() => setSelectedDay(null)} />
               </View>
 
               <ScrollView contentContainerStyle={styles.modalScroll} showsVerticalScrollIndicator={false}>
@@ -350,6 +350,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.5)'
   },
   modalGradient: { padding: 20, width: '100%' },
+  // HEADER
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   modalTitle: { fontSize: 22, fontWeight: 'bold', color: '#D4AF37', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
   closeButton: { padding: 5 },

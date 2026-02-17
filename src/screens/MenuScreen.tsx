@@ -1,20 +1,31 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
-import { Alert, Image, Linking, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Dimensions, Image, Linking, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenHeader from '../components/ScreenHeader';
 
 // --- EKRANLAR ---
+import AbdestVisualScreen from './AbdestVisualScreen';
 import EsmaulHusnaScreen from './EsmaulHusnaScreen';
 import KazaTakipScreen from './KazaTakipScreen';
 import NamazVisualScreen from './NamazVisualScreen';
 import QiblaScreen from './QiblaScreen';
 import ZikirmatikScreen from './ZikirmatikScreen';
 
+
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const ICON_PATTERN = require('../../assets/icons/pattern.png');
 
 export default function MenuScreen() {
-  const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [activeScreen, setActiveScreen] = useState<string | null>(null);
+
+  // Reanimated Değerleri
+  const translateY = useSharedValue(SCREEN_HEIGHT);
+  const backdropOpacity = useSharedValue(0);
 
   const openNearbyMosques = () => {
     const query = "Camiler";
@@ -30,8 +41,43 @@ export default function MenuScreen() {
     }
   };
 
-  // Modal Kapatıcı
-  const closeModal = () => setActiveModal(null);
+  const openModal = (screenName: string) => {
+    setActiveScreen(screenName);
+    setModalVisible(true);
+
+    // Animasyonu Başlat (Giriş)
+    translateY.value = withTiming(0, {
+      duration: 500, // Slower for softness
+      easing: Easing.out(Easing.cubic) // Cubic easing for smooth start/stop
+    });
+    backdropOpacity.value = withTiming(1, { duration: 500 });
+  };
+
+  const closeModal = () => {
+    // Animasyonu Başlat (Çıkış)
+    translateY.value = withTiming(SCREEN_HEIGHT, {
+      duration: 500,
+      easing: Easing.in(Easing.cubic)
+    }, (finished) => {
+      if (finished) {
+        runOnJS(setModalVisible)(false);
+      }
+    });
+    backdropOpacity.value = withTiming(0, { duration: 300 });
+  };
+
+  // Animasyon Stilleri
+  const animatedModalStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: translateY.value }]
+    };
+  });
+
+  const animatedBackdropStyle = useAnimatedStyle(() => {
+    return {
+      opacity: backdropOpacity.value
+    };
+  });
 
   return (
     <LinearGradient
@@ -48,20 +94,17 @@ export default function MenuScreen() {
         <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
 
           {/* HEADER */}
-          <View style={styles.headerRow}>
-            <View style={styles.headerLeft}>
-              <MaterialCommunityIcons name="view-grid" size={28} color="#D4AF37" />
-              <View style={styles.verticalLine} />
-              <Text style={styles.headerTitle}>Menü & Araçlar</Text>
-            </View>
-          </View>
+          <ScreenHeader
+            title="Menü & Araçlar"
+            leftIcon="none"
+          />
 
           {/* 1. İSLAMİ ARAÇLAR GRUBU */}
           <Text style={styles.sectionTitle}>İslami Araçlar</Text>
           <View style={styles.cardContainer}>
 
             {/* Namaz Hocası (Yeni) */}
-            <TouchableOpacity style={styles.menuItem} onPress={() => setActiveModal('NAMAZ_VISUAL')} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => openModal('NAMAZ_VISUAL')} activeOpacity={0.7}>
               <View style={[styles.iconBox, { backgroundColor: 'rgba(255, 215, 0, 0.1)' }]}>
                 <MaterialCommunityIcons name="human-handsdown" size={24} color="#FFD700" />
               </View>
@@ -69,13 +112,29 @@ export default function MenuScreen() {
                 <Text style={styles.menuTitle}>Namaz Hocası</Text>
                 <Text style={styles.menuSubtitle}>Görsel anlatımlı namaz kılınışı</Text>
               </View>
-              <MaterialCommunityIcons name="chevron-right" size={24} color="rgba(255,255,255,0.3)" />
+              <Ionicons name="chevron-forward" size={24} color="#D4AF37" />
             </TouchableOpacity>
 
             <View style={styles.separator} />
 
+            {/* Abdest Rehberi (YENİ) */}
+            <TouchableOpacity style={styles.menuItem} onPress={() => openModal('ABDEST_VISUAL')} activeOpacity={0.7}>
+              <View style={[styles.iconBox, { backgroundColor: 'rgba(79, 195, 247, 0.1)' }]}>
+                <MaterialCommunityIcons name="water" size={24} color="#4FC3F7" />
+              </View>
+              <View style={styles.menuTextContent}>
+                <Text style={styles.menuTitle}>Abdest Rehberi</Text>
+                <Text style={styles.menuSubtitle}>Adım adım abdest alınışı</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color="#D4AF37" />
+            </TouchableOpacity>
+
+
+
+            <View style={styles.separator} />
+
             {/* Esmaül Hüsna (Yeni) */}
-            <TouchableOpacity style={styles.menuItem} onPress={() => setActiveModal('ESMAUL_HUSNA')} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => openModal('ESMAUL_HUSNA')} activeOpacity={0.7}>
               <View style={[styles.iconBox, { backgroundColor: 'rgba(155, 89, 182, 0.1)' }]}>
                 <MaterialCommunityIcons name="star-crescent" size={24} color="#9b59b6" />
               </View>
@@ -83,11 +142,11 @@ export default function MenuScreen() {
                 <Text style={styles.menuTitle}>Esmaül Hüsna</Text>
                 <Text style={styles.menuSubtitle}>Allah'ın 99 güzel ismi</Text>
               </View>
-              <MaterialCommunityIcons name="chevron-right" size={24} color="rgba(255,255,255,0.3)" />
+              <Ionicons name="chevron-forward" size={24} color="#D4AF37" />
             </TouchableOpacity>
 
             {/* Kıble Bulucu (Yeni) */}
-            <TouchableOpacity style={styles.menuItem} onPress={() => setActiveModal('QIBLA')} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => openModal('QIBLA')} activeOpacity={0.7}>
               <View style={[styles.iconBox, { backgroundColor: 'rgba(52, 152, 219, 0.1)' }]}>
                 <MaterialCommunityIcons name="compass" size={24} color="#3498db" />
               </View>
@@ -95,7 +154,7 @@ export default function MenuScreen() {
                 <Text style={styles.menuTitle}>Kıble Bulucu</Text>
                 <Text style={styles.menuSubtitle}>Kabe yönünü bul</Text>
               </View>
-              <MaterialCommunityIcons name="chevron-right" size={24} color="rgba(255,255,255,0.3)" />
+              <Ionicons name="chevron-forward" size={24} color="#D4AF37" />
             </TouchableOpacity>
 
             <View style={styles.separator} />
@@ -110,13 +169,13 @@ export default function MenuScreen() {
                 <Text style={styles.menuTitle}>Yakındaki Camiler</Text>
                 <Text style={styles.menuSubtitle}>Haritada en yakın camileri gör</Text>
               </View>
-              <MaterialCommunityIcons name="chevron-right" size={24} color="rgba(255,255,255,0.3)" />
+              <Ionicons name="chevron-forward" size={24} color="#D4AF37" />
             </TouchableOpacity>
 
             <View style={styles.separator} />
 
             {/* Zikirmatik */}
-            <TouchableOpacity style={styles.menuItem} onPress={() => setActiveModal('ZIKIRMATIK')} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => openModal('ZIKIRMATIK')} activeOpacity={0.7}>
               <View style={[styles.iconBox, { backgroundColor: 'rgba(52, 152, 219, 0.1)' }]}>
                 <MaterialCommunityIcons name="fingerprint" size={24} color="#3498db" />
               </View>
@@ -124,13 +183,13 @@ export default function MenuScreen() {
                 <Text style={styles.menuTitle}>Zikirmatik</Text>
                 <Text style={styles.menuSubtitle}>Dijital tesbih sayacı</Text>
               </View>
-              <MaterialCommunityIcons name="chevron-right" size={24} color="rgba(255,255,255,0.3)" />
+              <Ionicons name="chevron-forward" size={24} color="#D4AF37" />
             </TouchableOpacity>
 
             <View style={styles.separator} />
 
             {/* Kaza Takibi */}
-            <TouchableOpacity style={styles.menuItem} onPress={() => setActiveModal('KAZA_TAKIP')} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => openModal('KAZA_TAKIP')} activeOpacity={0.7}>
               <View style={[styles.iconBox, { backgroundColor: 'rgba(231, 76, 60, 0.1)' }]}>
                 <MaterialCommunityIcons name="notebook-edit" size={24} color="#e74c3c" />
               </View>
@@ -138,7 +197,7 @@ export default function MenuScreen() {
                 <Text style={styles.menuTitle}>Kaza Takibi</Text>
                 <Text style={styles.menuSubtitle}>Borçlarınızı not alın</Text>
               </View>
-              <MaterialCommunityIcons name="chevron-right" size={24} color="rgba(255,255,255,0.3)" />
+              <Ionicons name="chevron-forward" size={24} color="#D4AF37" />
             </TouchableOpacity>
 
           </View>
@@ -146,8 +205,6 @@ export default function MenuScreen() {
           {/* 2. AYARLAR GRUBU */}
           <Text style={styles.sectionTitle}>Ayarlar</Text>
           <View style={styles.cardContainer}>
-
-
 
             <View style={styles.separator} />
 
@@ -160,7 +217,7 @@ export default function MenuScreen() {
                 <Text style={styles.menuTitle}>Konum Servisi</Text>
                 <Text style={styles.menuSubtitle}>Otomatik (GPS)</Text>
               </View>
-              <MaterialCommunityIcons name="chevron-right" size={24} color="rgba(255,255,255,0.3)" />
+              <Ionicons name="chevron-forward" size={24} color="#D4AF37" />
             </TouchableOpacity>
 
           </View>
@@ -170,27 +227,35 @@ export default function MenuScreen() {
 
         </ScrollView>
 
-        {/* --- GLOBAL MODAL YAPISI --- */}
+        {/* --- GLOBAL CUSTOM MODAL --- */}
         <Modal
-          visible={activeModal !== null}
-          animationType="slide"
-          presentationStyle="pageSheet"
+          visible={modalVisible}
+          transparent={true} // Arkaplanı şeffaf yap
+          animationType="none" // Native animasyonu kapat
           onRequestClose={closeModal}
         >
-          <View style={{ flex: 1, backgroundColor: '#0F2027' }}>
-            {/* Kapat Butonu (Tüm modallar için ortak) */}
-            <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
-              <Text style={styles.closeButtonText}>Kapat</Text>
-            </TouchableOpacity>
+          {/* Backdrop (Karanlık Arka Plan) */}
+          <Animated.View style={[
+            StyleSheet.absoluteFillObject,
+            { backgroundColor: 'rgba(0,0,0,0.5)' },
+            animatedBackdropStyle
+          ]} />
+
+          {/* İçerik Container (Slide Up) */}
+          <Animated.View style={[
+            { flex: 1, backgroundColor: '#0F2027', marginTop: Platform.OS === 'ios' ? 40 : 0, borderTopLeftRadius: 20, borderTopRightRadius: 20, overflow: 'hidden' },
+            animatedModalStyle
+          ]}>
 
             {/* İçerik Render */}
-            {activeModal === 'NAMAZ_VISUAL' && <NamazVisualScreen />}
-            {activeModal === 'ESMAUL_HUSNA' && <EsmaulHusnaScreen />}
-            {activeModal === 'QIBLA' && <QiblaScreen />}
-            {activeModal === 'ZIKIRMATIK' && <ZikirmatikScreen />}
-            {activeModal === 'KAZA_TAKIP' && <KazaTakipScreen />}
+            {activeScreen === 'NAMAZ_VISUAL' && <NamazVisualScreen onClose={closeModal} />}
+            {activeScreen === 'ABDEST_VISUAL' && <AbdestVisualScreen onClose={closeModal} />}
+            {activeScreen === 'ESMAUL_HUSNA' && <EsmaulHusnaScreen onClose={closeModal} />}
+            {activeScreen === 'QIBLA' && <QiblaScreen onClose={closeModal} />}
+            {activeScreen === 'ZIKIRMATIK' && <ZikirmatikScreen onClose={closeModal} />}
+            {activeScreen === 'KAZA_TAKIP' && <KazaTakipScreen onClose={closeModal} />}
 
-          </View>
+          </Animated.View>
         </Modal>
 
       </SafeAreaView>
@@ -206,10 +271,7 @@ const styles = StyleSheet.create({
   bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.05, tintColor: '#D4AF37', resizeMode: 'contain' },
 
   // HEADER
-  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 15 },
-  headerLeft: { flexDirection: 'row', alignItems: 'center' },
-  verticalLine: { width: 1, height: 24, backgroundColor: '#D4AF37', marginHorizontal: 12 },
-  headerTitle: { fontSize: 24, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', color: '#D4AF37' },
+  // headerRow etc removed
 
   sectionTitle: { fontSize: 14, fontWeight: 'bold', color: '#D4AF37', marginBottom: 10, marginLeft: 25, marginTop: 20, textTransform: 'uppercase', letterSpacing: 1 },
 

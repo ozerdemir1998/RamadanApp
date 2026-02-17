@@ -1,6 +1,7 @@
 // src/screens/HomeScreen.tsx
 import { useNextPrayer } from '@/hooks/useNextPrayer';
 import { getPrayerTimesByCity, getPrayerTimesByCoordinates, PrayerTimes } from '@/services/api';
+import { getEsmaulHusna } from '@/services/esmaService';
 import { registerForPushNotificationsAsync, schedulePrayerNotifications } from '@/services/notificationService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -15,7 +16,7 @@ const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 const IS_SMALL_DEVICE = SCREEN_HEIGHT < 700;
 
 // --- İKONLARI PROJEDEN ÇEKME ---
-const ICON_PATTERN = require('../../assets/icons/pattern.png'); 
+const ICON_PATTERN = require('../../assets/icons/pattern.png');
 const ICON_ESMA = require('../../assets/icons/esma.png');
 const ICON_QUOTE = require('../../assets/icons/quote.png');
 
@@ -36,97 +37,130 @@ const QUOTE_LIST = [
 ];
 
 // --- ANİMASYONLU SATIR BİLEŞENİ ---
-const AnimatedInfoRow = ({ 
-    iconSource, 
-    label, 
-    mainText, 
-    subText, 
-    isQuote = false,
-    scrollY 
-}: { 
-    iconSource: any, 
-    label: string, 
-    mainText: string, 
-    subText: string, 
-    isQuote?: boolean,
-    scrollY: number 
+// --- ANİMASYONLU SATIR BİLEŞENİ ---
+const AnimatedInfoRow = ({
+  iconSource,
+  label,
+  mainText,
+  subText,
+  isQuote = false,
+  scrollY
+}: {
+  iconSource: any,
+  label: string,
+  mainText: string,
+  subText: string,
+  isQuote?: boolean,
+  scrollY: number
 }) => {
-    const [elementY, setElementY] = useState(0);
-    const [hasAnimated, setHasAnimated] = useState(false);
+  const [elementY, setElementY] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
 
-    // Animasyon Değerleri
-    const lineAnim = useRef(new Animated.Value(0)).current; 
-    const contentAnim = useRef(new Animated.Value(0)).current; 
+  // Animasyon Değerleri
+  const lineScale = useRef(new Animated.Value(0)).current;
+  const topSlideAndOpacity = useRef(new Animated.Value(0)).current;
+  const bottomSlideAndOpacity = useRef(new Animated.Value(0)).current;
 
-    // Görünürlük Kontrolü
-    useEffect(() => {
-        if (!hasAnimated && elementY > 0 && (scrollY + SCREEN_HEIGHT) > elementY + 50) {
-            triggerAnimation();
-        }
-    }, [scrollY, elementY]);
+  // Görünürlük Kontrolü
+  useEffect(() => {
+    // "Uygulama ilk açıldığında" dediği için hemen başlatıyoruz, 
+    // ama yine de layout hesaplandıktan sonra (elementY > 0) tetiklenmesi sağlıklı.
+    if (!hasAnimated && elementY > 0) {
+      triggerAnimation();
+    }
+  }, [elementY]);
 
-    const triggerAnimation = () => {
-        setHasAnimated(true);
-        Animated.sequence([
-            Animated.timing(lineAnim, {
-                toValue: 1,
-                duration: 600,
-                useNativeDriver: false,
-                easing: Easing.out(Easing.exp)
-            }),
-            Animated.timing(contentAnim, {
-                toValue: 1,
-                duration: 800,
-                useNativeDriver: true,
-                easing: Easing.out(Easing.back(1.5))
-            })
-        ]).start();
-    };
+  const triggerAnimation = () => {
+    setHasAnimated(true);
+    Animated.sequence([
+      // 1. Çizgi Açılacak (0 -> 1)
+      Animated.timing(lineScale, {
+        toValue: 1,
+        duration: 700,
+        useNativeDriver: true,
+        easing: Easing.out(Easing.cubic)
+      }),
+      // 2. İçerikler Çıkacak (Paralel)
+      Animated.parallel([
+        Animated.timing(topSlideAndOpacity, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+          easing: Easing.out(Easing.back(0.8))
+        }),
+        Animated.timing(bottomSlideAndOpacity, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+          easing: Easing.out(Easing.back(0.8))
+        })
+      ])
+    ]).start();
+  };
 
-    const lineHeight = lineAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0, 60]
-    });
+  // Interpolasyonlar
+  // Üst kısım: Aşağıdan yukarıya çıkacak (Maskenin altından) 
+  const topTranslateY = topSlideAndOpacity.interpolate({
+    inputRange: [0, 1],
+    outputRange: [60, 0]
+  });
 
-    const iconTranslateX = contentAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [30, 0]
-    });
+  // Alt kısım: Yukarıdan aşağıya inecek (Maskenin üstünden)
+  const bottomTranslateY = bottomSlideAndOpacity.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-60, 0]
+  });
 
-    const textTranslateX = contentAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [-30, 0]
-    });
-
-    return (
-        <View 
-            style={styles.simpleRow}
-            onLayout={(event) => {
-                const layout = event.nativeEvent.layout;
-                setElementY(layout.y);
+  return (
+    <View
+      style={styles.infoCard}
+      onLayout={(event) => {
+        const layout = event.nativeEvent.layout;
+        setElementY(layout.y);
+      }}
+    >
+      {/* ÜST İÇERİK MASKESİ */}
+      <View style={{ overflow: 'hidden', alignItems: 'center', width: '100%', paddingBottom: 5 }}>
+        <Animated.View style={{
+          opacity: topSlideAndOpacity,
+          transform: [{ translateY: topTranslateY }],
+          alignItems: 'center',
+          width: '100%'
+        }}>
+          <Image
+            source={iconSource}
+            style={{
+              width: isQuote ? 70 : 90,
+              height: isQuote ? 70 : 90,
+              tintColor: '#D4AF37',
+              marginBottom: 10
             }}
-        >
-            <Animated.View style={[styles.iconSide, { opacity: contentAnim, transform: [{ translateX: iconTranslateX }] }]}>
-                <Image 
-                    source={iconSource} 
-                    style={{ width: isQuote ? 50 : 80, height: isQuote ? 50 : 80, tintColor: '#D4AF37' }} 
-                    resizeMode="contain"
-                />
-            </Animated.View>
+            resizeMode="contain"
+          />
+          <Text style={styles.label}>{label}</Text>
+        </Animated.View>
+      </View>
 
-            <View style={styles.dividerContainer}>
-                <Animated.View style={[styles.verticalDivider, { height: lineHeight }]} />
-            </View>
+      {/* ÇİZGİ */}
+      <Animated.View style={[styles.horizontalDivider, { transform: [{ scaleX: lineScale }] }]} />
 
-            <Animated.View style={[styles.textSide, { opacity: contentAnim, transform: [{ translateX: textTranslateX }] }]}>
-                <Text style={styles.label}>{label}</Text>
-                <Text style={[styles.mainText, isQuote && { fontSize: IS_SMALL_DEVICE ? 18 : 20, fontStyle: 'italic' }]}>
-                    {isQuote ? `"${mainText}"` : mainText}
-                </Text>
-                <Text style={styles.subText}>{isQuote ? `— ${subText}` : subText}</Text>
-            </Animated.View>
-        </View>
-    );
+      {/* ALT İÇERİK MASKESİ */}
+      <View style={{ overflow: 'hidden', alignItems: 'center', width: '100%', paddingTop: 5 }}>
+        <Animated.View style={{
+          opacity: bottomSlideAndOpacity,
+          transform: [{ translateY: bottomTranslateY }],
+          alignItems: 'center',
+          width: '100%'
+        }}>
+          <Text style={[styles.mainText, isQuote && { fontSize: IS_SMALL_DEVICE ? 20 : 24, fontStyle: 'italic', paddingHorizontal: 10 }]}>
+            {isQuote ? `"${mainText}"` : mainText}
+          </Text>
+
+          <Text style={styles.subText}>{isQuote ? `— ${subText}` : subText}</Text>
+        </Animated.View>
+      </View>
+    </View>
+  );
 };
 
 export default function HomeScreen() {
@@ -134,10 +168,10 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [locationName, setLocationName] = useState<string>('Konum Bulunuyor...');
   const [refreshing, setRefreshing] = useState(false);
-  
+
   // Scroll Takibi State'i
   const [scrollY, setScrollY] = useState(0);
-  
+
   const [dailyEsma, setDailyEsma] = useState(ESMA_LIST[0]);
   const [dailyQuote, setDailyQuote] = useState(QUOTE_LIST[0]);
 
@@ -150,12 +184,20 @@ export default function HomeScreen() {
   useEffect(() => {
     registerForPushNotificationsAsync();
     getUserLocationAndFetchTimes();
-    randomizeContent(); 
+    loadRandomEsma();
+    setDailyQuote(QUOTE_LIST[Math.floor(Math.random() * QUOTE_LIST.length)]);
   }, []);
 
-  const randomizeContent = () => {
-    setDailyEsma(ESMA_LIST[Math.floor(Math.random() * ESMA_LIST.length)]);
-    setDailyQuote(QUOTE_LIST[Math.floor(Math.random() * QUOTE_LIST.length)]);
+  const loadRandomEsma = async () => {
+    try {
+      const allEsmas = await getEsmaulHusna();
+      if (allEsmas && allEsmas.length > 0) {
+        const randomEsma = allEsmas[Math.floor(Math.random() * allEsmas.length)];
+        setDailyEsma(randomEsma);
+      }
+    } catch (e) {
+      console.log("Error loading random esma", e);
+    }
   };
 
   const getUserLocationAndFetchTimes = async () => {
@@ -168,7 +210,7 @@ export default function HomeScreen() {
       let location = await Location.getCurrentPositionAsync({});
       const { latitude, longitude } = location.coords;
       const data = await getPrayerTimesByCoordinates(latitude, longitude);
-      
+
       let address = await Location.reverseGeocodeAsync({ latitude, longitude });
       if (address && address.length > 0) {
         setLocationName(address[0].subregion || address[0].city || 'Konumunuz');
@@ -191,12 +233,13 @@ export default function HomeScreen() {
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-    randomizeContent();
+    loadRandomEsma();
+    setDailyQuote(QUOTE_LIST[Math.floor(Math.random() * QUOTE_LIST.length)]);
     getUserLocationAndFetchTimes().then(() => setRefreshing(false));
   }, []);
 
   const handleScroll = (event: any) => {
-      setScrollY(event.nativeEvent.contentOffset.y);
+    setScrollY(event.nativeEvent.contentOffset.y);
   };
 
   const getPrayerIcon = (vakit: string) => {
@@ -211,13 +254,13 @@ export default function HomeScreen() {
     }
   };
 
-  const currentPrayerTitle = (!times) ? "Hoşgeldiniz" : 
-      (nextPrayerName === 'İmsak' ? 'Yatsı' :
-       nextPrayerName === 'Güneş' ? 'İmsak' :
-       nextPrayerName === 'Öğle' ? 'Güneş' :
-       nextPrayerName === 'İkindi' ? 'Öğle' :
-       nextPrayerName === 'Akşam' ? 'İkindi' :
-       nextPrayerName === 'Yatsı' ? 'Akşam' : nextPrayerName);
+  const currentPrayerTitle = (!times) ? "Hoşgeldiniz" :
+    (nextPrayerName === 'İmsak' ? 'Yatsı' :
+      nextPrayerName === 'Güneş' ? 'İmsak' :
+        nextPrayerName === 'Öğle' ? 'Güneş' :
+          nextPrayerName === 'İkindi' ? 'Öğle' :
+            nextPrayerName === 'Akşam' ? 'İkindi' :
+              nextPrayerName === 'Yatsı' ? 'Akşam' : nextPrayerName);
 
   if (loading) {
     return (
@@ -229,7 +272,7 @@ export default function HomeScreen() {
 
   return (
     <LinearGradient
-      colors={['#0F2027', '#203A43', '#2C5364']} 
+      colors={['#0F2027', '#203A43', '#2C5364']}
       style={{ flex: 1 }}
     >
       <View style={styles.backgroundPatternContainer} pointerEvents="none">
@@ -238,23 +281,24 @@ export default function HomeScreen() {
       </View>
 
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.container}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#D4AF37" />}
           onScroll={handleScroll}
           scrollEventThrottle={16}
+          showsVerticalScrollIndicator={false}
         >
-          
+
           {/* HEADER */}
           <View style={styles.headerContainer}>
             <View style={styles.titleRow}>
-                <MaterialCommunityIcons 
-                  name={getPrayerIcon(currentPrayerTitle) as any} 
-                  size={IS_SMALL_DEVICE ? 50 : 64} 
-                  color="#D4AF37"
-                  style={{ marginRight: 15, marginTop: 5 }} 
-                />
-                <Text style={styles.headerTitle}>{currentPrayerTitle}</Text>
+              <MaterialCommunityIcons
+                name={getPrayerIcon(currentPrayerTitle) as any}
+                size={IS_SMALL_DEVICE ? 56 : 72}
+                color="#D4AF37"
+                style={{ marginRight: 20, marginTop: 5 }}
+              />
+              <Text style={styles.headerTitle}>{currentPrayerTitle}</Text>
             </View>
             <Text style={styles.headerSubtitle}>{locationName}, {todayDate}</Text>
           </View>
@@ -267,18 +311,18 @@ export default function HomeScreen() {
             </Text>
           </View>
 
-          <View style={{height: 30}} />
+          <View style={{ height: 50 }} />
 
           {/* --- ANİMASYONLU GÜNÜN ESMASI --- */}
-          <AnimatedInfoRow 
-              iconSource={ICON_ESMA}
-              label="Günün Esması"
-              mainText={dailyEsma.name}
-              subText={dailyEsma.meaning}
-              scrollY={scrollY}
+          <AnimatedInfoRow
+            iconSource={ICON_ESMA}
+            label="Günün Esması"
+            mainText={dailyEsma.name}
+            subText={dailyEsma.meaning}
+            scrollY={scrollY}
           />
 
-          <View style={{height: 30}} />
+          <View style={{ height: 40 }} />
 
           {/* VAKİT LİSTESİ */}
           {times && (
@@ -292,23 +336,20 @@ export default function HomeScreen() {
             </View>
           )}
 
-          <View style={{height: 30}} />
+          <View style={{ height: 40 }} />
 
           {/* --- ANİMASYONLU GÜNÜN SÖZÜ --- */}
-          <AnimatedInfoRow 
-              iconSource={ICON_QUOTE}
-              label="Günün Sözü"
-              mainText={dailyQuote.text}
-              subText={dailyQuote.author}
-              isQuote={true}
-              scrollY={scrollY}
+          <AnimatedInfoRow
+            iconSource={ICON_QUOTE}
+            label="Günün Sözü"
+            mainText={dailyQuote.text}
+            subText={dailyQuote.author}
+            isQuote={true}
+            scrollY={scrollY}
           />
 
-          {/* DİNAMİK ALT BOŞLUK (EKLENDİ)
-             Menünün altında kalmaması için:
-             Tab Bar Yüksekliği (yaklaşık 70-80) + Güvenli Alan (insets.bottom) 
-          */}
-          <View style={{ height: 85 + insets.bottom }} /> 
+          {/* DİNAMİK ALT BOŞLUK */}
+          <View style={{ height: 85 + insets.bottom }} />
 
         </ScrollView>
       </SafeAreaView>
@@ -321,11 +362,11 @@ const PrayerItem = ({ time, name, active, icon }: { time: string, name: string, 
   <View style={styles.prayerRow}>
     <Text style={[styles.prayerTime, active && styles.activeText]}>{time}</Text>
     <Text style={[styles.prayerName, active && styles.activeText]}>{name}</Text>
-    <MaterialCommunityIcons 
-        name={icon as any} 
-        size={active ? 30 : 26} 
-        color={active ? "#FFD700" : "rgba(255,255,255,0.3)"} 
-        style={active ? styles.glowingIcon : {}} 
+    <MaterialCommunityIcons
+      name={icon as any}
+      size={active ? 34 : 28}
+      color={active ? "#FFD700" : "rgba(255,255,255,0.3)"}
+      style={active ? styles.glowingIcon : {}}
     />
   </View>
 );
@@ -337,42 +378,57 @@ const styles = StyleSheet.create({
   backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
   bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.07, tintColor: '#D4AF37', resizeMode: 'contain' },
 
-  // HEADER (Küçük cihazlar için margin ayarı)
-  headerContainer: { alignItems: 'center', marginTop: IS_SMALL_DEVICE ? 10 : 25, marginBottom: IS_SMALL_DEVICE ? 30 : 60 },
+  // HEADER
+  headerContainer: { alignItems: 'center', marginTop: IS_SMALL_DEVICE ? 15 : 30, marginBottom: IS_SMALL_DEVICE ? 30 : 50 },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
-  headerTitle: { fontSize: IS_SMALL_DEVICE ? 56 : 72, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', color: '#D4AF37', letterSpacing: 2, lineHeight: IS_SMALL_DEVICE ? 60 : 80 },
-  headerSubtitle: { color: 'rgba(212, 175, 55, 0.6)', fontSize: 16, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', letterSpacing: 1, marginTop: 5 },
+  headerTitle: { fontSize: IS_SMALL_DEVICE ? 56 : 72, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', color: '#D4AF37', letterSpacing: 1, lineHeight: IS_SMALL_DEVICE ? 60 : 80, textAlign: 'center' },
+  headerSubtitle: { color: 'rgba(212, 175, 55, 0.7)', fontSize: 18, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', letterSpacing: 1, marginTop: 5 },
 
-  // SAYAÇ (Küçük cihazlarda fontu biraz küçült)
-  countdownContainer: { alignItems: 'center', marginBottom: 20 },
-  countdownText: { fontSize: IS_SMALL_DEVICE ? 54 : 68, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', fontWeight: '300', color: '#D4AF37', textShadowColor: 'rgba(212, 175, 55, 0.5)', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 20, letterSpacing: 2 },
-  nextPrayerInfo: { color: 'rgba(255,255,255,0.4)', fontSize: 14, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', marginTop: -5, letterSpacing: 1 },
-
-  // ANİMASYONLU KART STİLLERİ
-  simpleRow: { 
-      flexDirection: 'row', 
-      alignItems: 'center', 
-      width: '90%', // Genişlik biraz artırıldı
-      alignSelf: 'center', 
-      paddingHorizontal: 5,
-      minHeight: 80 
+  // SAYAÇ - DAHA KLASİK VE UZUNLAMASINA TİP
+  countdownContainer: { alignItems: 'center', marginBottom: 10, marginTop: 10 },
+  countdownText: {
+    fontSize: IS_SMALL_DEVICE ? 64 : 82,
+    fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif', // En klasik font
+    fontWeight: 'bold',
+    color: '#D4AF37',
+    textShadowColor: 'rgba(212, 175, 55, 0.4)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 25,
+    letterSpacing: 6,
+    fontVariant: ['tabular-nums'],
+    textAlign: 'center',
+    width: '100%',
+    transform: [{ scaleY: 1.3 }], // Uzun görünüm
+    paddingVertical: 10
   },
-  iconSide: { width: 60, alignItems: 'center', justifyContent: 'center' },
-  
-  dividerContainer: { width: 1, height: 60, justifyContent: 'center', alignItems: 'center', marginHorizontal: 15 },
-  verticalDivider: { width: 1, backgroundColor: '#D4AF37', opacity: 0.5 }, 
-  
-  textSide: { flex: 1, justifyContent: 'center', alignItems: 'flex-start' }, 
-  
-  label: { color: '#D4AF37', fontSize: 12, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 4, opacity: 0.8 },
-  mainText: { color: '#fff', fontSize: IS_SMALL_DEVICE ? 24 : 28, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', marginBottom: 4, textAlign: 'left' },
-  subText: { color: 'rgba(255,255,255,0.5)', fontSize: 13, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', fontStyle: 'italic', lineHeight: 20, textAlign: 'left' },
+  nextPrayerInfo: { color: 'rgba(255,255,255,0.6)', fontSize: 17, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', marginTop: 5, letterSpacing: 1.5 },
 
-  // LİSTE (Padding azaltıldı)
-  prayerListContainer: { width: '100%', marginTop: 10, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)' },
-  prayerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: IS_SMALL_DEVICE ? 15 : 20, paddingHorizontal: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' },
-  activeText: { color: '#D4AF37', fontWeight: 'bold' },
-  prayerTime: { color: '#fff', fontSize: 20, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', width: 90 },
-  prayerName: { color: 'rgba(255,255,255,0.7)', fontSize: 20, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', flex: 1, textAlign: 'center' },
-  glowingIcon: { textShadowColor: '#D4AF37', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 20, opacity: 1 }
+  // ANİMASYONLU KART STİLLERİ (YENİ - MERKEZİ)
+  infoCard: {
+    width: '100%',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20
+  },
+
+  horizontalDivider: { width: 60, height: 2, backgroundColor: '#D4AF37', opacity: 0.5, marginVertical: 12, borderRadius: 1 },
+
+  label: { color: '#D4AF37', fontSize: 15, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', textTransform: 'uppercase', letterSpacing: 2.5, marginBottom: 8, opacity: 0.9, textAlign: 'center' },
+  mainText: { color: '#fff', fontSize: IS_SMALL_DEVICE ? 26 : 30, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', marginBottom: 8, textAlign: 'center', lineHeight: 36 },
+  subText: { color: 'rgba(255,255,255,0.7)', fontSize: 16, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', fontStyle: 'italic', lineHeight: 24, textAlign: 'center' },
+
+  // LİSTE
+  prayerListContainer: { width: '100%', marginTop: 25, marginBottom: 25, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)' },
+  prayerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: IS_SMALL_DEVICE ? 18 : 22, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' },
+  activeText: { color: '#D4AF37', fontWeight: 'bold', fontSize: 24 },
+  prayerTime: { color: '#fff', fontSize: 22, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', width: 100 },
+  prayerName: { color: 'rgba(255,255,255,0.8)', fontSize: 22, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', flex: 1, textAlign: 'center' },
+
+  // İKON BLUR YUMUŞATILDI
+  glowingIcon: {
+    textShadowColor: 'rgba(212, 175, 55, 0.5)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 20, // Yumuşatıldı
+    opacity: 1
+  }
 });

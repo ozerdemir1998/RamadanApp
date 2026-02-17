@@ -1,10 +1,11 @@
 import { fetchRecipeDetail } from '@/services/recipeService';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Dimensions, Image, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context'; // EKLENDİ
+import ScreenHeader from '../components/ScreenHeader';
 
 const { width } = Dimensions.get('window');
 
@@ -55,9 +56,17 @@ export default function RecipeDetailScreen() {
             {/* --- BEYAZ BAŞLIĞI GİZLER --- */}
             <Stack.Screen options={{ headerShown: false }} />
 
+            <View style={{ paddingTop: 15, backgroundColor: '#0F2027' }}>
+                <ScreenHeader
+                    title={trName || "Tarif Detayı"}
+                    onLeftPress={() => router.back()}
+                    centerTitle
+                />
+            </View>
+
             <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
 
-                {/* 1. RESİM ALANI (HEADER) */}
+                {/* 1. RESİM ALANI (HEADER) - Title removed from here */}
                 <View style={styles.imageHeader}>
                     {recipe.image ? (
                         <Image
@@ -71,23 +80,11 @@ export default function RecipeDetailScreen() {
                         </View>
                     )}
 
-                    {/* Üst Kısım Karartma (Geri butonu için) */}
-                    <LinearGradient colors={['rgba(0,0,0,0.6)', 'transparent']} style={styles.topGradient} />
-
-                    <TouchableOpacity onPress={() => router.back()} style={styles.backBtnAbsolute}>
-                        <View style={styles.backBtnCircle}>
-                            <Ionicons name="arrow-back" size={24} color="#D4AF37" />
-                        </View>
-                    </TouchableOpacity>
-
-                    {/* Alt Kısım Karartma (Yazıların Okunması İçin Güçlendirildi) */}
+                    {/* Alt Kısım Karartma */}
                     <LinearGradient
-                        colors={['transparent', 'rgba(15, 32, 39, 0.7)', '#0F2027']}
+                        colors={['transparent', '#0F2027']}
                         style={styles.bottomGradient}
-                    >
-                        <Text style={styles.imageTitle}>{recipe.title}</Text>
-                        <Text style={styles.imageSubTitle}>Geleneksel Lezzetler</Text>
-                    </LinearGradient>
+                    />
                 </View>
 
                 {/* 2. İÇERİK (KOYU TEMA) */}

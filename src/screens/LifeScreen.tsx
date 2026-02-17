@@ -1,9 +1,10 @@
-import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import ScreenHeader from '../components/ScreenHeader';
 import { DailyStory, fetchDailyContent } from '../services/contentService';
 
 const { width } = Dimensions.get('window');
@@ -22,10 +23,7 @@ const CATEGORIES = [
   { id: 'tatlilar', title: 'Tatlılar', icon: 'cupcake' },
 ];
 
-const BLOG_POSTS = [
-  { id: 1, title: "Orucun Bedene Faydaları", category: "Sağlık", date: "Bugün" },
-  { id: 2, title: "Teravih Namazı Rehberi", category: "İbadet", date: "Dün" },
-];
+
 
 export default function LifeScreen() {
   const router = useRouter();
@@ -78,13 +76,7 @@ export default function LifeScreen() {
         <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
 
           {/* HEADER */}
-          <View style={styles.headerRow}>
-            <View style={styles.headerLeft}>
-              <MaterialCommunityIcons name="leaf" size={28} color="#D4AF37" />
-              <View style={styles.verticalLine} />
-              <Text style={styles.headerTitle}>Ramazan Rehberi</Text>
-            </View>
-          </View>
+          <ScreenHeader title="Ramazan Rehberi" leftIcon="none" />
 
           {/* --- 1. MANEVİYAT KARTLARI (PREMIUM TASARIM) --- */}
           <View style={styles.sectionContainer}>
@@ -109,7 +101,7 @@ export default function LifeScreen() {
                     <Text style={styles.cardSubtitle}>{ayet?.subTitle || "Yükleniyor..."}</Text>
                   </View>
                   <View style={[styles.arrowContainer, { backgroundColor: 'rgba(212, 175, 55, 0.1)' }]}>
-                    <MaterialCommunityIcons name="arrow-right" size={20} color="#D4AF37" />
+                    <Ionicons name="chevron-forward" size={20} color="#D4AF37" />
                   </View>
                 </View>
                 {/* Altın Çerçeve Efekti */}
@@ -186,7 +178,7 @@ export default function LifeScreen() {
           <View style={styles.sectionContainer}>
             {/* Kadir Gecesi Kartı */}
             <TouchableOpacity
-              style={[styles.spiritualCard, { marginBottom: 10 }]}
+              style={styles.spiritualCard}
               activeOpacity={0.9}
               onPress={() => router.push('/special/kadir-gecesi')}
             >
@@ -201,7 +193,7 @@ export default function LifeScreen() {
                   <Text style={styles.cardTitle}>Kadir Gecesi</Text>
                   <Text style={styles.cardSubtitle}>Yapılacaklar, Dualar ve Fazileti</Text>
                 </View>
-                <MaterialCommunityIcons name="chevron-right" size={24} color="#D4AF37" />
+                <Ionicons name="chevron-forward" size={24} color="#D4AF37" />
               </LinearGradient>
             </TouchableOpacity>
 
@@ -222,7 +214,27 @@ export default function LifeScreen() {
                   <Text style={[styles.cardTitle, { color: '#A0E6FF' }]}>Bayram Namazı</Text>
                   <Text style={[styles.cardSubtitle, { color: 'rgba(160, 230, 255, 0.7)' }]}>Kılınışı ve Anlamı</Text>
                 </View>
-                <MaterialCommunityIcons name="chevron-right" size={24} color="#A0E6FF" />
+                <Ionicons name="chevron-forward" size={24} color="#D4AF37" />
+              </LinearGradient>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.spiritualCard}
+              activeOpacity={0.9}
+              onPress={() => router.push('/nafile-list')}
+            >
+              <LinearGradient
+                colors={['rgba(100, 50, 200, 0.4)', 'rgba(60, 30, 120, 0.4)']}
+                style={[styles.spiritualGradient, { flexDirection: 'row', alignItems: 'center', paddingVertical: 15 }]}
+              >
+                <View style={[styles.iconContainer, { backgroundColor: 'rgba(255, 255, 255, 0.1)' }]}>
+                  <MaterialCommunityIcons name="hands-pray" size={24} color="#E0B0FF" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.cardTitle, { color: '#E0B0FF' }]}>Nafile Namazlar</Text>
+                  <Text style={[styles.cardSubtitle, { color: 'rgba(224, 176, 255, 0.7)' }]}>Teheccüd, Evvabin, Tesbih...</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={24} color="#D4AF37" />
               </LinearGradient>
             </TouchableOpacity>
           </View>
@@ -255,25 +267,7 @@ export default function LifeScreen() {
             ))}
           </View>
 
-          {/* --- 3. BLOG LİSTESİ --- */}
-          <View style={[styles.sectionHeader, { marginTop: 25 }]}>
-            <Text style={styles.sectionTitle}>İlham Veren Okumalar</Text>
-          </View>
 
-          <View style={styles.sectionContainer}>
-            {BLOG_POSTS.map((post) => (
-              <TouchableOpacity key={post.id} style={styles.blogCard}>
-                <View style={styles.blogImagePlaceholder}>
-                  <FontAwesome5 name="feather-alt" size={16} color="#D4AF37" />
-                </View>
-                <View style={styles.blogContent}>
-                  <Text style={styles.blogCategory}>{post.category} • {post.date}</Text>
-                  <Text style={styles.blogTitle}>{post.title}</Text>
-                </View>
-                <MaterialCommunityIcons name="chevron-right" size={20} color="rgba(255,255,255,0.3)" />
-              </TouchableOpacity>
-            ))}
-          </View>
 
           <View style={{ height: 85 + insets.bottom }} />
 
@@ -289,15 +283,9 @@ export default function LifeScreen() {
 const styles = StyleSheet.create({
   container: { paddingBottom: 20 },
   backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
-  bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.05, tintColor: '#D4AF37', resizeMode: 'contain' },
+  bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.1, tintColor: '#D4AF37', resizeMode: 'contain' },
 
-  // HEADER
-  headerRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 20 },
-  headerLeft: { flexDirection: 'row', alignItems: 'center' },
-  verticalLine: { width: 1, height: 24, backgroundColor: '#D4AF37', marginHorizontal: 12 },
-  headerTitle: { fontSize: 24, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', color: '#D4AF37' },
-
-  sectionContainer: { paddingHorizontal: 20 },
+  sectionContainer: { marginBottom: 30, paddingHorizontal: 20 },
 
   // --- SPIRITUAL CARDS ---
   spiritualCard: {
@@ -385,15 +373,7 @@ const styles = StyleSheet.create({
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif'
   },
 
-  // --- BLOG CARDS ---
-  blogCard: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 12, padding: 12, marginBottom: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)'
-  },
-  blogImagePlaceholder: { width: 40, height: 40, borderRadius: 10, backgroundColor: 'rgba(212, 175, 55, 0.1)', justifyContent: 'center', alignItems: 'center', marginRight: 15 },
-  blogContent: { flex: 1 },
-  blogCategory: { color: '#D4AF37', fontSize: 11, marginBottom: 3, textTransform: 'uppercase' },
-  blogTitle: { color: '#fff', fontSize: 15, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+
 
 
 });

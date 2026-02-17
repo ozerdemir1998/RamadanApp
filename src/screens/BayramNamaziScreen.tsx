@@ -1,9 +1,10 @@
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import ScreenHeader from '../components/ScreenHeader';
 import { BAYRAM_NAMAZI_CONTENT } from '../data/specialOccasionsData';
 
 const { width } = Dimensions.get('window');
@@ -26,13 +27,11 @@ export default function BayramNamaziScreen() {
             <SafeAreaView style={{ flex: 1 }} edges={['top']}>
                 <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
-                    <View style={styles.header}>
-                        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                            <Ionicons name="arrow-back" size={24} color="#A0E6FF" />
-                        </TouchableOpacity>
-                        <Text style={styles.headerTitle}>{BAYRAM_NAMAZI_CONTENT.title}</Text>
-                        <View style={{ width: 40 }} />
-                    </View>
+                    <ScreenHeader
+                        title={BAYRAM_NAMAZI_CONTENT.title}
+                        onLeftPress={() => router.back()}
+                        centerTitle
+                    />
 
                     {/* HERO SECTION */}
                     <View style={styles.heroSection}>
@@ -85,9 +84,7 @@ const styles = StyleSheet.create({
     backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
     bgPatternImage: { position: 'absolute', width: 400, height: 400, opacity: 0.03, tintColor: '#A0E6FF', resizeMode: 'contain' },
 
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 15, marginHorizontal: -20 },
-    backButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.1)', justifyContent: 'center', alignItems: 'center' },
-    headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#FFF', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+    // Header removed
 
     scrollContent: { paddingHorizontal: 20, paddingBottom: 20 },
 

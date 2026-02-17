@@ -1,3 +1,5 @@
+import CloseButton from '@/components/CloseButton';
+import ScreenHeader from '@/components/ScreenHeader';
 import { AlarmSettings, STORAGE_KEY, defaultSettings, registerForPushNotificationsAsync } from '@/services/notificationService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -106,20 +108,13 @@ export default function AlarmsScreen() {
 
             <SafeAreaView style={{ flex: 1 }} edges={['top']}>
 
+                {/* HEADER */}
+                <ScreenHeader
+                    title="Namaz Bildirimleri"
+                    leftIcon="none"
+                />
+
                 <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-
-                    {/* HEADER */}
-                    <View style={styles.headerRow}>
-                        <View style={styles.headerLeft}>
-                            <MaterialCommunityIcons name="bell-ring" size={28} color="#D4AF37" />
-                            <View style={styles.verticalLine} />
-                            <Text style={styles.headerTitle}>Bildirimler</Text>
-                        </View>
-                    </View>
-
-                    <Text style={styles.sectionDesc}>
-                        Vakitler için bildirim ayarlarını buradan yönetebilirsiniz.
-                    </Text>
 
                     {VAKITLER.map((item) => {
                         const setting = settings[item.key] || { enabled: false, offset: 0 };
@@ -183,6 +178,10 @@ export default function AlarmsScreen() {
                         );
                     })}
 
+                    <Text style={styles.sectionDesc}>
+                        Vakitler için bildirim ayarlarını buradan yönetebilirsiniz.
+                    </Text>
+
                     <View style={{ height: 100 }} />
                 </ScrollView>
             </SafeAreaView>
@@ -200,9 +199,7 @@ export default function AlarmsScreen() {
                             <View style={styles.modalContent}>
                                 <View style={styles.modalHeader}>
                                     <Text style={styles.modalTitle}>Bildirim Zamanı Seçin</Text>
-                                    <TouchableOpacity onPress={() => setModalVisible(false)}>
-                                        <MaterialCommunityIcons name="close" size={24} color="rgba(255,255,255,0.5)" />
-                                    </TouchableOpacity>
+                                    <CloseButton onPress={() => setModalVisible(false)} />
                                 </View>
 
                                 <View style={styles.modalOptionsGrid}>
@@ -241,16 +238,13 @@ const styles = StyleSheet.create({
 
     // HEADER
     content: { padding: 20 },
-    headerRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 20,
-        paddingVertical: 10
-    },
-    headerLeft: { flexDirection: 'row', alignItems: 'center' },
-    verticalLine: { width: 1, height: 24, backgroundColor: '#D4AF37', marginHorizontal: 12 },
-    headerTitle: { fontSize: 24, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', color: '#D4AF37' },
-    sectionDesc: { color: 'rgba(255,255,255,0.5)', fontSize: 14, marginBottom: 20, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+    // Actually ScreenHeader is inside ScrollView here? 
+    // In current code: ScrollView contains ScreenHeader. 
+    // ScreenHeader width is 100%. 
+    // content style has padding: 20. 
+    // If I put ScreenHeader inside padding 20, it will be indented.
+    // ScreenHeader should be full width.
+    sectionDesc: { color: 'rgba(255,255,255,0.5)', fontSize: 13, marginBottom: 20, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', paddingHorizontal: 20, marginTop: 10 },
 
     // KART
     alarmCard: {

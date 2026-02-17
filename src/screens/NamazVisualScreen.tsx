@@ -1,3 +1,5 @@
+import CloseButton from '../components/CloseButton';
+
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useRef, useState } from 'react';
@@ -11,115 +13,175 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 const { width, height } = Dimensions.get('window');
 const ICON_PATTERN = require('../../assets/icons/pattern.png');
 
-// --- NAMAZ GÖRSELLERİ ---
-// Lütfen resimleri assets/namaz/ klasörüne bu isimlerle koyduğunuzdan emin olun.
+// --- NAMAZ GÖRSELLERİ (ERKEK & KADIN) ---
 const NAMAZ_IMAGES = {
-  tekbir: require('../../assets/namaz/1-tekbir.png'),
-  kiyam: require('../../assets/namaz/2-kiyam.png'),
-  ruku: require('../../assets/namaz/3-ruku.png'),
-  secde: require('../../assets/namaz/4-secde.png'),
-  oturus: require('../../assets/namaz/5-oturus.png'),
+  male: {
+    tekbir: require('../../assets/namaz/erkek-tekbir.png'),
+    kiyam: require('../../assets/namaz/erkek-kiyam.png'),
+    ruku: require('../../assets/namaz/erkek-ruku.png'),
+    kavme: require('../../assets/namaz/erkek-kavme.png'),
+    secde: require('../../assets/namaz/erkek-secde.png'),
+    oturus: require('../../assets/namaz/erkek-oturus.png'),
+    selam: require('../../assets/namaz/erkek-selam.png'), // Sağ
+    selam2: require('../../assets/namaz/erkek-selam2.png'), // Sol
+  },
+  female: {
+    tekbir: require('../../assets/namaz/kadin-tekbir.png'),
+    kiyam: require('../../assets/namaz/kadin-kiyam.png'),
+    ruku: require('../../assets/namaz/kadin-ruku.png'),
+    kavme: require('../../assets/namaz/kadin-kavme.png'),
+    secde: require('../../assets/namaz/kadin-secde.png'),
+    oturus: require('../../assets/namaz/kadin-oturus.png'),
+    selam: require('../../assets/namaz/kadin-selam.png'), // Sağ
+    selam2: require('../../assets/namaz/kadin-selam2.png'), // Sol
+  }
 };
+
+type Gender = 'male' | 'female';
 
 // --- TİP TANIMLARI ---
 type NamazStep = {
   title: string;
   arabic?: string;
-  desc: string;
-  image: any; // İkon yerine resim kaynağı
+  desc: { male: string; female: string }; // Cinsiyete özel açıklama
+  imageKey: keyof typeof NAMAZ_IMAGES['male'];
 };
 
 // --- NAMAZ HAREKETLERİ OLUŞTURUCU ---
 const createRakat = (rakatNumber: number): NamazStep[] => {
-  const steps: NamazStep[] = [
+  return [
     {
       title: `${rakatNumber}. Rekat: Kıyam`,
-      desc: 'Eller bağlı, Fatiha ve Zamm-ı Sure okunur.',
+      desc: {
+        male: 'Eller göbek altında bağlanır. Gözler secde yerine bakar. "Euzü Besmele" çekilir, "Fatiha" suresi ve ardından bir "Zamm-ı Sure" okunur.',
+        female: 'Eller göğüs üzerinde bağlanır. Gözler secde yerine bakar. "Euzü Besmele" çekilir, "Fatiha" suresi ve ardından bir "Zamm-ı Sure" okunur.'
+      },
       arabic: 'Elhamdülillahi rabbil alemin...',
-      image: NAMAZ_IMAGES.kiyam
+      imageKey: 'kiyam'
     },
     {
       title: 'Rüku',
-      desc: 'Bel dümdüz olacak şekilde eğilinir, ellerle dizler tutulur.',
+      desc: {
+        male: '"Allahuekber" diyerek eğilinir. Bel dümdüz, bacaklar gergin olur. Ellerle dizler kavranır. 3 kere "Sübhane Rabbiyel Azim" (Büyük olan Rabbim her türlü noksan sıfatlardan uzaktır) denir.',
+        female: '"Allahuekber" diyerek eğilinir. Sırt biraz meyilli, dizler hafif bükük durur. Eller dizlerin üzerine konur. 3 kere "Sübhane Rabbiyel Azim" denir.'
+      },
       arabic: 'Sübhane Rabbiyel Azim (3 kere)',
-      image: NAMAZ_IMAGES.ruku
+      imageKey: 'ruku'
     },
     {
       title: 'Doğrulma (Kavme)',
-      desc: 'Rükudan tam olarak doğrulup kısa bir süre dik durulur.',
-      image: NAMAZ_IMAGES.kiyam // Doğrulurken yine ayakta (kıyam) duruşu
+      desc: {
+        male: 'Rükudan kalkarken "Semiallahü limen hamideh" (Allah, kendisine hamd edeni işitir) denir. Tam dik durunca "Rabbena lekel hamd" (Rabbimiz, hamd sanadır) denir.',
+        female: 'Rükudan kalkarken "Semiallahü limen hamideh" denir. Tam doğrulunca "Rabbena lekel hamd" denir. Eller yana salınır.'
+      },
+      imageKey: 'kavme'
     },
     {
       title: '1. Secde',
-      desc: 'Alın ve burun yere değecek şekilde kapanılır.',
+      desc: {
+        male: '"Allahuekber" diyerek secdeye gidilir. Dirsekler yerden kalkık, karın uyluktan uzak tutulur. 3 kere "Sübhane Rabbiyel Ala" (Yüce olan Rabbim her türlü noksan sıfatlardan uzaktır) denir.',
+        female: '"Allahuekber" diyerek secdeye gidilir. Kollar yere yapışık, karın uyluğa bitişik, vücut toplu halde olur. 3 kere "Sübhane Rabbiyel Ala" denir.'
+      },
       arabic: 'Sübhane Rabbiyel Ala (3 kere)',
-      image: NAMAZ_IMAGES.secde
+      imageKey: 'secde'
     },
     {
       title: 'Oturuş (Celse)',
-      desc: 'İki secde arasında kısa bir süre dizler üzerinde oturulur.',
-      image: NAMAZ_IMAGES.oturus
+      desc: {
+        male: '"Allahuekber" diyerek oturulur. Sol ayak üzerine oturulur, sağ ayak parmakları kıbleye gelecek şekilde dikilir. Eller dizlerdedir.',
+        female: '"Allahuekber" diyerek oturulur. Ayaklar sağ taraftan dışarı çıkarılır ve yere oturulur. Eller dizlerin üzerindedir.'
+      },
+      imageKey: 'oturus'
     },
     {
       title: '2. Secde',
-      desc: 'Tekrar secdeye gidilir.',
+      desc: {
+        male: '"Allahuekber" diyerek tekrar secdeye gidilir. Vücut yine aynı pozisyonda (dirsekler havada) tutulur. 3 kere "Sübhane Rabbiyel Ala" denir.',
+        female: '"Allahuekber" diyerek tekrar secdeye gidilir. Vücut yine toplu halde tutulur. 3 kere "Sübhane Rabbiyel Ala" denir.'
+      },
       arabic: 'Sübhane Rabbiyel Ala (3 kere)',
-      image: NAMAZ_IMAGES.secde
+      imageKey: 'secde'
     },
   ];
-  return steps;
 };
 
-// SABAH NAMAZI ADIMLARI
-const SABAH_NAMAZI_STEPS: NamazStep[] = [
+// SABAH NAMAZI ADIMLARI (Şablon)
+const SABAH_NAMAZI_STEPS_TEMPLATE: NamazStep[] = [
   {
     title: 'Niyet',
-    desc: 'Kalben niyet edilir, gözler secde yerine bakar.',
-    image: NAMAZ_IMAGES.kiyam // Niyet ederken ayakta durulur
+    desc: {
+      male: 'Kıbleye dönülür, ayaklar dört parmak açılır. "Niyet ettim Allah rızası için Sabah namazının sünnetini/farzını kılmaya" diye niyet edilir.',
+      female: 'Kıbleye dönülür, ayaklar bitişik veya yakın tutulur. "Niyet ettim Allah rızası için Sabah namazının sünnetini/farzını kılmaya" diye niyet edilir.'
+    },
+    imageKey: 'kiyam'
   },
   {
     title: 'İftitah Tekbiri',
-    desc: 'Eller kulak hizasına kaldırılır.',
+    desc: {
+      male: 'Eller kulak hizasına kaldırılır, avuçlar kıbleye bakar. "Allahu Ekber" diyerek eller bağlanır.',
+      female: 'Eller göğüs hizasına kaldırılır, parmak uçları omuz hizasına gelir. "Allahu Ekber" diyerek eller bağlanır.'
+    },
     arabic: 'Allahu Ekber',
-    image: NAMAZ_IMAGES.tekbir
+    imageKey: 'tekbir'
   },
   {
     title: 'Sübhaneke & Kıraat',
-    desc: 'Eller bağlanır. Sübhaneke ve sureler okunur.',
+    desc: {
+      male: 'Eller göbek altında bağlanır. "Sübhaneke" okunur. Ardından Euzü-Besmele, Fatiha ve bir Zamm-ı Sure okunur.',
+      female: 'Eller göğüs üzerinde bağlanır. "Sübhaneke" okunur. Ardından Euzü-Besmele, Fatiha ve bir Zamm-ı Sure okunur.'
+    },
     arabic: 'Sübhanekellahümme...',
-    image: NAMAZ_IMAGES.kiyam
+    imageKey: 'kiyam'
   },
-  ...createRakat(1).slice(1), // İlk kıyam adımını atla, yukarıda ekledik
+  ...createRakat(1).slice(1),
   ...createRakat(2),
   {
     title: 'Son Oturuş',
-    desc: 'Dizler üzerine oturulur. Ettahiyyatu, Salli, Barik, Rabbena okunur.',
+    desc: {
+      male: 'Sol ayak üzerine oturulur, sağ ayak dikilir. Sırasıyla "Ettahiyyatu, Allahümme Salli, Allahümme Barik ve Rabbena" duaları okunur.',
+      female: 'Ayaklar sağa çıkarılarak yere oturulur. Sırasıyla "Ettahiyyatu, Allahümme Salli, Allahümme Barik ve Rabbena" duaları okunur.'
+    },
     arabic: 'Ettahiyyatü lillahi...',
-    image: NAMAZ_IMAGES.oturus
+    imageKey: 'oturus'
   },
   {
-    title: 'Selam',
-    desc: 'Önce sağa, sonra sola selam verilir.',
+    title: 'Selam (Sağ)',
+    desc: {
+      male: 'Baş sağa çevrilerek omuzlara bakılır ve "Esselamü aleyküm ve rahmetullah" denir.',
+      female: 'Baş sağa çevrilerek "Esselamü aleyküm ve rahmetullah" denir.'
+    },
     arabic: 'Esselamü aleyküm ve rahmetullah',
-    image: NAMAZ_IMAGES.oturus // Selam verirken oturulur
+    imageKey: 'selam'
+  },
+  {
+    title: 'Selam (Sol)',
+    desc: {
+      male: 'Baş sola çevrilerek omuzlara bakılır ve "Esselamü aleyküm ve rahmetullah" denir.',
+      female: 'Baş sola çevrilerek "Esselamü aleyküm ve rahmetullah" denir.'
+    },
+    arabic: 'Esselamü aleyküm ve rahmetullah',
+    imageKey: 'selam2'
   },
 ];
 
-const GENERIC_STEPS = SABAH_NAMAZI_STEPS;
+const GENERIC_STEPS = SABAH_NAMAZI_STEPS_TEMPLATE;
 
 const PRAYERS = [
-  { id: 1, name: 'Sabah Namazı', rakats: '2 Sünnet, 2 Farz', sequence: SABAH_NAMAZI_STEPS },
-  { id: 2, name: 'Öğle Namazı', rakats: '4 Sünnet, 4 Farz, 2 Son Sünnet', sequence: GENERIC_STEPS },
-  { id: 3, name: 'İkindi Namazı', rakats: '4 Sünnet, 4 Farz', sequence: GENERIC_STEPS },
-  { id: 4, name: 'Akşam Namazı', rakats: '3 Farz, 2 Sünnet', sequence: GENERIC_STEPS },
-  { id: 5, name: 'Yatsı Namazı', rakats: '4 Sünnet, 4 Farz, 3 Vitir', sequence: GENERIC_STEPS },
+  { id: 1, name: 'Sabah Namazı', arabicName: 'الفجر', rakats: '2 Sünnet, 2 Farz', sequence: SABAH_NAMAZI_STEPS_TEMPLATE },
+  { id: 2, name: 'Öğle Namazı', arabicName: 'الظهر', rakats: '4 Sünnet, 4 Farz, 2 Son Sünnet', sequence: GENERIC_STEPS },
+  { id: 3, name: 'İkindi Namazı', arabicName: 'العصر', rakats: '4 Sünnet, 4 Farz', sequence: GENERIC_STEPS },
+  { id: 4, name: 'Akşam Namazı', arabicName: 'المغرب', rakats: '3 Farz, 2 Sünnet', sequence: GENERIC_STEPS },
+  { id: 5, name: 'Yatsı Namazı', arabicName: 'العشاء', rakats: '4 Sünnet, 4 Farz, 3 Vitir', sequence: GENERIC_STEPS },
 ];
 
-export default function NamazVisualScreen() {
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+import ScreenHeader from '../components/ScreenHeader';
 
-  // EKLENDİ: Güvenli alanları al
+export default function NamazVisualScreen({ onClose }: { onClose?: () => void }) {
+  const [expandedId, setExpandedId] = useState<number | null>(null);
   const insets = useSafeAreaInsets();
+
+  // Cinsiyet Seçimi (Varsayılan: Erkek)
+  const [selectedGender, setSelectedGender] = useState<Gender>('male');
 
   // --- SLIDESHOW STATE ---
   const [showSlideshow, setShowSlideshow] = useState(false);
@@ -138,7 +200,7 @@ export default function NamazVisualScreen() {
 
   const startPractice = (prayerName: string, steps: NamazStep[]) => {
     setCurrentPrayerName(prayerName);
-    setCurrentSteps(steps);
+    setCurrentSteps(steps); // Şablon adımları set et (imageKey içeriyor)
     setCurrentStepIndex(0);
     setShowSlideshow(true);
   };
@@ -151,28 +213,44 @@ export default function NamazVisualScreen() {
     }
   };
 
+  const prevStep = () => {
+    if (currentStepIndex > 0) {
+      setCurrentStepIndex(prev => prev - 1);
+    }
+  };
+
+  const handlePress = (evt: any) => {
+    const { locationX } = evt.nativeEvent;
+    // Ekranın sol %30'una tıklanırsa geri git, yoksa ileri git
+    if (locationX < width * 0.3) {
+      prevStep();
+    } else {
+      nextStep();
+    }
+  };
+
   // --- ANİMASYON TETİKLEYİCİSİ ---
   useEffect(() => {
     if (showSlideshow) {
-      // Başlangıç değerleri
+      // Sadece modal ilk açıldığında animasyon yap
       fadeAnim.setValue(0);
       scaleAnim.setValue(0.95);
 
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 500, // 500ms sürede belirsin
+          duration: 300,
           useNativeDriver: true,
         }),
         Animated.spring(scaleAnim, {
           toValue: 1,
-          friction: 7,
+          friction: 8,
           tension: 40,
           useNativeDriver: true,
         })
       ]).start();
     }
-  }, [currentStepIndex, showSlideshow]);
+  }, [showSlideshow]);
 
   // --- SLIDESHOW RENDER ---
   const renderSlideshow = () => {
@@ -180,73 +258,69 @@ export default function NamazVisualScreen() {
     const step = currentSteps[currentStepIndex];
     if (!step) return null;
 
-    const progress = ((currentStepIndex + 1) / currentSteps.length) * 100;
+    // Seçilen cinsiyete göre doğru görseli al
+    const currentImage = NAMAZ_IMAGES[selectedGender][step.imageKey];
 
     return (
       <Modal visible={showSlideshow} animationType="fade" transparent={false} onRequestClose={() => setShowSlideshow(false)}>
         <LinearGradient colors={['#0F2027', '#203A43', '#2C5364']} style={{ flex: 1 }}>
-          <StatusBar hidden />
+          <StatusBar hidden={false} barStyle="light-content" />
 
-          <TouchableOpacity activeOpacity={1} style={{ flex: 1 }} onPress={nextStep}>
-            <SafeAreaView style={{ flex: 1 }}>
+          {/* Navigasyon Alanı (Tüm Ekran) */}
+          <View style={{ flex: 1 }} onTouchEnd={handlePress}>
+            {/* Safe Area View yerine manual padding kullanıyoruz çünkü Modal içinde SafeAreaView bazen tutarsız olabilir */}
+            <View style={{ flex: 1, paddingTop: Platform.OS === 'android' ? 40 : insets.top }}>
 
-              {/* ÜST BAR */}
-              <View style={styles.slideHeader}>
-                <View style={styles.progressBarContainer}>
-                  <View style={[styles.progressBar, { width: `${progress}%` }]} />
-                </View>
+              {/* ÜST BAR (SABİT KONUM) */}
+              <View style={[styles.slideHeader, { marginTop: 10 }]}>
                 <View style={styles.headerControls}>
                   <Text style={styles.slideCounter}>{currentStepIndex + 1} / {currentSteps.length}</Text>
-                  <TouchableOpacity onPress={() => setShowSlideshow(false)} style={styles.closeBtn}>
-                    <MaterialCommunityIcons name="close" size={28} color="#fff" />
-                  </TouchableOpacity>
+
+                  {/* Navigasyon İpucu - Ortaya taşındı */}
+                  <Text style={[styles.tapHint, { fontSize: 12, marginTop: 0 }]}>
+                    {`${currentStepIndex > 0 ? "< Sol: Geri  |  " : ""} Sağ: İleri >`}
+                  </Text>
+
+                  <CloseButton onPress={() => setShowSlideshow(false)} />
                 </View>
               </View>
 
-              {/* ORTA: GÖRSEL (IMAGE KULLANILIYOR) */}
+              {/* İÇERİK (SABİT KONUM) */}
               <View style={styles.slideContent}>
-                <Text style={styles.slidePrayerName}>{currentPrayerName}</Text>
+                <Text style={styles.slidePrayerName}>{currentPrayerName} ({selectedGender === 'male' ? 'Erkek' : 'Kadın'})</Text>
 
-                <Animated.View
-                  style={[
-                    styles.slideIconContainer,
-                    {
-                      opacity: fadeAnim,
-                      transform: [{ scale: scaleAnim }]
-                    }
-                  ]}
-                >
+                {/* ANIMASYON YOK - SABİT CONTAINER */}
+                <View style={styles.slideIconContainer}>
                   <View style={styles.imageFrame}>
-                    {/* --- DEĞİŞİKLİK BURADA: Image Bileşeni --- */}
                     <Image
-                      source={step.image}
+                      source={currentImage}
                       style={styles.namazImage}
                       resizeMode="contain"
                     />
                   </View>
+                </View>
 
-                  {/* Arkadaki Işık Efekti */}
-                  <View style={styles.glowEffect} />
-                </Animated.View>
-
-                <Animated.View style={{ opacity: fadeAnim, alignItems: 'center', width: '100%', paddingHorizontal: 20 }}>
+                {/* METİN ALANI */}
+                <View style={styles.textContainer}>
                   <Text style={styles.slideTitle}>{step.title}</Text>
 
                   {step.arabic && (
                     <Text style={styles.slideArabic}>"{step.arabic}"</Text>
                   )}
 
-                  <Text style={styles.slideDesc}>{step.desc}</Text>
-                </Animated.View>
+                  {/* HATA ÇÖZÜMÜ: Eski tanımlarda string kalmış olabilir veya Hot Reload sorunu olabilir */}
+                  <Text style={styles.slideDesc}>
+                    {typeof step.desc === 'string'
+                      ? step.desc
+                      : (step.desc[selectedGender] || '')}
+                  </Text>
+                </View>
               </View>
 
-              {/* ALT: İPUCU */}
-              <View style={styles.slideFooter}>
-                <Text style={styles.tapHint}>Sonraki hareket için ekrana dokunun</Text>
-              </View>
+              {/* ALT: İPUCU - Kaldırıldı */}
 
-            </SafeAreaView>
-          </TouchableOpacity>
+            </View>
+          </View>
         </LinearGradient>
       </Modal>
     );
@@ -263,10 +337,34 @@ export default function NamazVisualScreen() {
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
 
-          <View style={styles.header}>
-            <MaterialCommunityIcons name="human" size={60} color="#D4AF37" />
-            <Text style={styles.headerTitle}>Namaz Hocası</Text>
-            <Text style={styles.headerSub}>Adım adım namaz kılınışı</Text>
+          <View style={{ marginBottom: 20 }}>
+            <ScreenHeader
+              title="Namaz Hocası"
+              leftIcon="close"
+              onLeftPress={onClose}
+              centerTitle
+            />
+          </View>
+
+          {/* CİNSİYET SEÇİMİ TOGGLE */}
+          <View style={styles.genderToggleContainer}>
+            <TouchableOpacity
+              style={[styles.genderButton, selectedGender === 'male' && styles.genderButtonActive]}
+              onPress={() => setSelectedGender('male')}
+              activeOpacity={0.8}
+            >
+              <MaterialCommunityIcons name="face-man" size={24} color={selectedGender === 'male' ? '#0F2027' : '#D4AF37'} />
+              <Text style={[styles.genderText, selectedGender === 'male' && styles.genderTextActive]}>Erkek</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.genderButton, selectedGender === 'female' && styles.genderButtonActive]}
+              onPress={() => setSelectedGender('female')}
+              activeOpacity={0.8}
+            >
+              <MaterialCommunityIcons name="face-woman" size={24} color={selectedGender === 'female' ? '#0F2027' : '#D4AF37'} />
+              <Text style={[styles.genderText, selectedGender === 'female' && styles.genderTextActive]}>Kadın</Text>
+            </TouchableOpacity>
           </View>
 
           {PRAYERS.map((prayer) => {
@@ -280,7 +378,8 @@ export default function NamazVisualScreen() {
                   activeOpacity={0.7}
                 >
                   <View style={styles.iconBox}>
-                    <Text style={styles.prayerId}>{prayer.id}</Text>
+                    <Text style={styles.arabicText}>{prayer.arabicName}</Text>
+                    <View style={styles.verticalDivider} />
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.prayerName, isExpanded && styles.activeText]}>{prayer.name}</Text>
@@ -306,7 +405,9 @@ export default function NamazVisualScreen() {
                         start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
                       >
                         <MaterialCommunityIcons name="play-circle-outline" size={28} color="#0F2027" />
-                        <Text style={styles.practiceText}>Uygulamalı Göster</Text>
+                        <Text style={styles.practiceText}>
+                          {selectedGender === 'male' ? 'Erkek' : 'Kadın'} İçin Göster
+                        </Text>
                       </LinearGradient>
                     </TouchableOpacity>
 
@@ -325,7 +426,36 @@ export default function NamazVisualScreen() {
             );
           })}
 
-          {/* DİNAMİK ALT BOŞLUK */}
+          {/* NAMAZ BİLGİ KARTI */}
+          <View style={styles.infoCard}>
+            <View style={styles.infoHeader}>
+              <MaterialCommunityIcons name="book-open-variant" size={24} color="#D4AF37" />
+              <Text style={styles.infoTitle}>Namazın Önemi ve Fazileti</Text>
+            </View>
+
+            <Text style={styles.infoText}>
+              Namaz (Salat), İslam'ın beş temel şartından ikincisidir ve "dinin direği" olarak kabul edilir.
+              Müminin Rabbiyle sohbete durması, O'na olan şükran borcunu ödemesi ve kulluğunu izhar etmesidir.
+            </Text>
+
+            <View style={styles.separator} />
+
+            <View style={styles.hadithContainer}>
+              <MaterialCommunityIcons name="format-quote-open" size={20} color="rgba(212, 175, 55, 0.5)" style={{ marginRight: 5 }} />
+              <Text style={styles.hadithText}>
+                "Cennetin anahtarı namazdır, namazın anahtarı da abdesttir."
+              </Text>
+            </View>
+            <Text style={styles.hadithSource}>(Tirmizî, Tahâret, 1)</Text>
+
+            <View style={styles.separator} />
+
+            <Text style={styles.infoText}>
+              Namaz, insanı kötülüklerden alıkoyar, manevi arınma sağlar ve kişiye disiplin kazandırır.
+              Miraç gecesinde, Peygamber Efendimize (s.a.v) ve ümmetine beş vakit olarak farz kılınmıştır.
+            </Text>
+          </View>
+
           <View style={{ height: 85 + insets.bottom }} />
 
         </ScrollView>
@@ -342,9 +472,36 @@ const styles = StyleSheet.create({
   bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.05, tintColor: '#D4AF37', resizeMode: 'contain' },
   container: { padding: 20 },
 
-  header: { alignItems: 'center', marginBottom: 30, marginTop: 10 },
-  headerTitle: { fontSize: 28, color: '#D4AF37', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', marginTop: 10 },
-  headerSub: { color: 'rgba(255,255,255,0.5)', fontSize: 14 },
+  // GENDER TOGGLE
+  genderToggleContainer: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 12,
+    marginBottom: 25,
+    padding: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)'
+  },
+  genderButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 10,
+  },
+  genderButtonActive: {
+    backgroundColor: '#D4AF37',
+  },
+  genderText: {
+    color: '#D4AF37',
+    fontWeight: 'bold',
+    marginLeft: 8,
+    fontSize: 16
+  },
+  genderTextActive: {
+    color: '#0F2027',
+  },
 
   card: {
     backgroundColor: 'rgba(255,255,255,0.05)',
@@ -360,13 +517,28 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   iconBox: {
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: 'rgba(212, 175, 55, 0.1)',
-    justifyContent: 'center', alignItems: 'center',
-    marginRight: 15
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 15,
+    width: 80, // Sabit genişlik hizalama için
+    justifyContent: 'flex-end',
   },
-  prayerId: { color: '#D4AF37', fontWeight: 'bold', fontSize: 18 },
-  prayerName: { color: '#fff', fontSize: 18, fontWeight: '600' },
+  arabicText: {
+    color: '#D4AF37',
+    fontWeight: 'bold',
+    fontSize: 22,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+    marginRight: 10,
+    textAlign: 'right'
+  },
+  verticalDivider: {
+    width: 2,
+    height: 30, // Yükseklik
+    backgroundColor: '#D4AF37',
+    opacity: 0.5,
+    borderRadius: 1
+  },
+  prayerName: { color: '#fff', fontSize: 16, fontWeight: '600' },
   activeText: { color: '#D4AF37' },
   rakats: { color: 'rgba(255,255,255,0.5)', fontSize: 12, marginTop: 2 },
 
@@ -391,48 +563,110 @@ const styles = StyleSheet.create({
   moreText: { color: 'rgba(255,255,255,0.3)', fontSize: 12, marginLeft: 16, fontStyle: 'italic' },
 
   // --- SLIDESHOW (MODAL) ---
-  slideHeader: { padding: 20 },
-  progressBarContainer: { height: 4, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 2, marginBottom: 15 },
-  progressBar: { height: '100%', backgroundColor: '#D4AF37', borderRadius: 2 },
+  slideHeader: { padding: 20, paddingTop: 10 }, // Üstten biraz boşluk
   headerControls: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   slideCounter: { color: 'rgba(255,255,255,0.5)', fontSize: 16, fontWeight: 'bold' },
-  closeBtn: { padding: 5 },
 
-  slideContent: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 },
-  slidePrayerName: { color: 'rgba(255,255,255,0.4)', fontSize: 16, marginBottom: 30, letterSpacing: 1, textTransform: 'uppercase' },
+  // --- GÜNCEL STYLE ---
+  slideContent: {
+    flex: 1,
+    justifyContent: 'flex-start', // KESİN KONUM İÇİN sabitleme
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 40, // BURASI KRİTİK: Sabah ile aynı hizada olması için sabit boşluk
+  },
+  slidePrayerName: { color: 'rgba(255,255,255,0.4)', fontSize: 16, marginBottom: 20, letterSpacing: 1, textTransform: 'uppercase' },
 
   slideIconContainer: {
-    width: 320, height: 380, // Biraz daha geniş
-    justifyContent: 'center', alignItems: 'center',
-    marginBottom: 30,
+    width: 320,
+    height: 380, // Sabit yükseklik
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20, // Metinle arası
   },
   imageFrame: {
     width: '100%',
     height: '100%',
-    backgroundColor: 'rgba(255,255,255,0.05)',
     borderRadius: 20,
     padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.3)',
     zIndex: 2,
     justifyContent: 'center',
-    alignItems: 'center', // Resmi ortala
-    overflow: 'hidden', // Taşmaları engelle
+    alignItems: 'center',
+    overflow: 'hidden',
   },
   namazImage: {
-    width: '90%',
-    height: '90%',
+    width: '100%',
+    height: '100%',
     zIndex: 3,
   },
-  glowEffect: {
-    position: 'absolute', width: 280, height: 280, borderRadius: 140,
-    backgroundColor: '#D4AF37', opacity: 0.15, zIndex: 1
-  },
+  // glowEffect style removed intentionally
 
+  // Metin kapsayıcısı için sabit alan
+  textContainer: {
+    height: 280, // Daha detaylı açıklamalar için yükseklik artırıldı
+    width: '100%',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    justifyContent: 'flex-start'
+  },
   slideTitle: { color: '#D4AF37', fontSize: 32, fontWeight: 'bold', marginBottom: 10, textAlign: 'center', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
   slideArabic: { color: '#fff', fontSize: 18, fontStyle: 'italic', marginBottom: 10, textAlign: 'center', opacity: 0.9 },
   slideDesc: { color: 'rgba(255,255,255,0.7)', fontSize: 16, textAlign: 'center', lineHeight: 24 },
 
   slideFooter: { padding: 20, alignItems: 'center', marginBottom: 20 },
-  tapHint: { color: 'rgba(255,255,255,0.3)', fontSize: 14 }
+  tapHint: { color: 'rgba(255,255,255,0.3)', fontSize: 14 },
+
+  // --- BİLGİ KARTI STİLLERİ ---
+  infoCard: {
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.2)',
+  },
+  infoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
+    paddingBottom: 10,
+  },
+  infoTitle: {
+    color: '#D4AF37',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 10,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+  },
+  infoText: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 14,
+    lineHeight: 22,
+    marginBottom: 10,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    marginVertical: 15,
+  },
+  hadithContainer: {
+    flexDirection: 'row',
+    marginBottom: 5,
+  },
+  hadithText: {
+    color: '#fff',
+    fontSize: 15,
+    fontStyle: 'italic',
+    flex: 1,
+    lineHeight: 24,
+  },
+  hadithSource: {
+    color: '#D4AF37',
+    fontSize: 12,
+    textAlign: 'right',
+    marginTop: 5,
+    opacity: 0.8,
+  }
 });

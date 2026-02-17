@@ -6,6 +6,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenHeader from '../components/ScreenHeader';
 import { DailyStory, fetchDailyContent } from '../services/contentService'; // EKLENDİ
 
 const ICON_PATTERN = require('../../assets/icons/ramadan.png');
@@ -302,13 +303,11 @@ export default function MediaPlayerScreen() {
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
 
         {/* HEADER */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleBackPress} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={28} color="#D4AF37" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>{data?.title || "Detay"}</Text>
-          <View style={{ width: 28 }} />
-        </View>
+        <ScreenHeader
+          title={data?.title || "Detay"}
+          onLeftPress={handleBackPress}
+          centerTitle
+        />
 
         <ScrollView contentContainerStyle={styles.content}>
 
@@ -397,7 +396,6 @@ export default function MediaPlayerScreen() {
           {!shouldShowPlayer() && (
             <View style={styles.noAudioContainer}>
               <MaterialCommunityIcons name="volume-off" size={24} color="rgba(255,255,255,0.3)" />
-              <Text style={styles.noAudioText}>Bu modda ses oynatıcısı kapalıdır.</Text>
             </View>
           )}
 
@@ -413,9 +411,7 @@ const styles = StyleSheet.create({
   backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
   bgPatternImage: { position: 'absolute', width: 250, height: 250, opacity: 0.05, tintColor: '#D4AF37', resizeMode: 'contain' },
 
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 15 },
-  backBtn: { padding: 5 },
-  headerTitle: { fontSize: 22, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', color: '#D4AF37' },
+  // HEADER styles removed
 
   content: { padding: 20, alignItems: 'center' },
   titleSection: { alignItems: 'center', marginBottom: 25 },

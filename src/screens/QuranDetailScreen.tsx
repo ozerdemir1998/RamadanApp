@@ -5,6 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Dimensions, FlatList, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import ScreenHeader from '../components/ScreenHeader';
 import { Ayah, quranService } from '../services/quranService';
 
 // --- HELPER: ARAPÇA RAKAMLAR ---
@@ -247,16 +248,14 @@ export default function QuranDetailScreen() {
     return (
         <LinearGradient
             colors={['#0F2027', '#203A43', '#2C5364']}
-            style={{ flex: 1, paddingTop: insets.top }}
+            style={{ flex: 1, paddingTop: 15 }}
         >
             {/* HEADER */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color="#FFF" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>{surahName}</Text>
-                <View style={{ width: 40 }} />
-            </View>
+            <ScreenHeader
+                title={surahName}
+                onLeftPress={() => router.back()}
+                centerTitle
+            />
 
             {loading ? (
                 /* ... Loader ... */
@@ -317,9 +316,7 @@ export default function QuranDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.1)' },
-    backButton: { padding: 5 },
-    headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#D4AF37', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+    // HEADER styles removed
 
     loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     listContent: { padding: 20, paddingBottom: 100 },

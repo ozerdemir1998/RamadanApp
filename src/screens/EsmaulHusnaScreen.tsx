@@ -1,13 +1,30 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useState } from 'react';
-import { Dimensions, FlatList, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { ESMAUL_HUSNA, Esma } from '../data/esmaulHusnaData';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Dimensions, FlatList, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import ScreenHeader from '../components/ScreenHeader';
+import { Esma } from '../data/esmaulHusnaData';
+import { getEsmaulHusna } from '../services/esmaService';
 
 const { width } = Dimensions.get('window');
 
-export default function EsmaulHusnaScreen() {
+export default function EsmaulHusnaScreen({ onClose }: { onClose?: () => void }) {
+    const router = useRouter();
+    const [esmaList, setEsmaList] = useState<Esma[]>([]);
+    const [loading, setLoading] = useState(true);
     const [selectedEsma, setSelectedEsma] = useState<Esma | null>(null);
+
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    const loadData = async () => {
+        const data = await getEsmaulHusna();
+        setEsmaList(data);
+        setLoading(false);
+    };
 
     // --- DETAY GÖRÜNÜMÜ ---
     if (selectedEsma) {
@@ -16,40 +33,43 @@ export default function EsmaulHusnaScreen() {
                 colors={['#0F2027', '#203A43', '#2C5364']}
                 style={styles.container}
             >
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => setSelectedEsma(null)} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color="#D4AF37" />
-                        <Text style={styles.backButtonText}>Listeye Dön</Text>
-                    </TouchableOpacity>
-                </View>
-
-                <ScrollView contentContainerStyle={styles.detailContent} showsVerticalScrollIndicator={false}>
-
-                    {/* BÜYÜK İKON / ARAPÇA */}
-                    <View style={styles.detailIconContainer}>
-                        <Text style={styles.detailArabicText}>{selectedEsma.arabic}</Text>
+                <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+                    <View style={{ marginTop: 20 }}>
+                        <ScreenHeader
+                            title={selectedEsma.name}
+                            onLeftPress={() => setSelectedEsma(null)}
+                            centerTitle
+                        />
                     </View>
 
-                    {/* İSİM */}
-                    <Text style={styles.detailName}>{selectedEsma.name}</Text>
+                    <ScrollView contentContainerStyle={styles.detailContent} showsVerticalScrollIndicator={false}>
 
-                    {/* AYIRAÇ */}
-                    <View style={styles.divider} />
+                        {/* BÜYÜK İKON / ARAPÇA */}
+                        <View style={styles.detailIconContainer}>
+                            <Text style={styles.detailArabicText} numberOfLines={1} adjustsFontSizeToFit>{selectedEsma.arabic}</Text>
+                        </View>
 
-                    {/* FAZİLET / ANLAM */}
-                    <View style={styles.infoSection}>
-                        <Text style={styles.label}>Anlamı & Fazileti</Text>
-                        <Text style={styles.detailMeaning}>{selectedEsma.meaning}</Text>
-                    </View>
+                        {/* İSİM */}
+                        <Text style={styles.detailName}>{selectedEsma.name}</Text>
 
-                    {/* ZİKİR SAYISI */}
-                    <View style={styles.zikirBox}>
-                        <Text style={styles.zikirText}>
-                            Bu güzel isim, <Text style={styles.zikirHighlight}>{selectedEsma.zikir}</Text> kez zikredilmelidir.
-                        </Text>
-                    </View>
+                        {/* AYIRAÇ */}
+                        <View style={styles.divider} />
 
-                </ScrollView>
+                        {/* FAZİLET / ANLAM */}
+                        <View style={styles.infoSection}>
+                            <Text style={styles.label}>Anlamı & Fazileti</Text>
+                            <Text style={styles.detailMeaning}>{selectedEsma.meaning}</Text>
+                        </View>
+
+                        {/* ZİKİR SAYISI */}
+                        <View style={styles.zikirBox}>
+                            <Text style={styles.zikirText}>
+                                Bu güzel isim, <Text style={styles.zikirHighlight}>{selectedEsma.zikir}</Text> kez zikredilmelidir.
+                            </Text>
+                        </View>
+
+                    </ScrollView>
+                </SafeAreaView>
             </LinearGradient>
         );
     }
@@ -65,63 +85,57 @@ export default function EsmaulHusnaScreen() {
                 <View style={styles.simpleCardContent}>
                     <View style={styles.simpleArabicBox}>
                         <Text style={styles.simpleArabic} numberOfLines={1} adjustsFontSizeToFit>{item.arabic}</Text>
+                        <View style={styles.verticalSeparator} />
                     </View>
-                    <View style={styles.verticalSeparator} />
                     <Text style={styles.simpleName}>{item.name}</Text>
-                    <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.3)" />
+                    <Ionicons name="chevron-forward" size={20} color="#D4AF37" />
                 </View>
             </TouchableOpacity>
         );
     };
+
+    const insets = useSafeAreaInsets();
+
+    if (loading) {
+        return (
+            <LinearGradient colors={['#0F2027', '#203A43', '#2C5364']} style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="large" color="#D4AF37" />
+                <Text style={{ color: '#D4AF37', marginTop: 10 }}>Esmaül Hüsna Yükleniyor...</Text>
+            </LinearGradient>
+        );
+    }
 
     return (
         <LinearGradient
             colors={['#0F2027', '#203A43', '#2C5364']}
             style={styles.container}
         >
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>Esmaül Hüsna</Text>
-                <Text style={styles.headerSubtitle}>En Güzel İsimler O'nundur</Text>
-            </View>
+            <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+                <View style={{ marginTop: 20, marginHorizontal: 20 }}>
+                    <ScreenHeader
+                        title="Esmaül Hüsna"
+                        onLeftPress={onClose || router.back}
+                        leftIcon={onClose ? 'close' : 'back'}
+                        centerTitle
+                    />
+                </View>
 
-            <FlatList
-                data={ESMAUL_HUSNA}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={renderItem}
-                contentContainerStyle={styles.listContent}
-                showsVerticalScrollIndicator={false}
-                numColumns={1} // Tek sütun liste
-            />
+                <FlatList
+                    data={esmaList}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={renderItem}
+                    contentContainerStyle={styles.listContent}
+                    showsVerticalScrollIndicator={false}
+                    numColumns={1} // Tek sütun liste
+                />
+            </SafeAreaView>
         </LinearGradient>
     );
 }
 
 const styles = StyleSheet.create({
     container: { flex: 1 },
-    header: {
-        paddingVertical: 20,
-        paddingHorizontal: 20,
-        alignItems: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255,255,255,0.1)',
-        minHeight: 80,
-        justifyContent: 'center'
-    },
-    headerTitle: {
-        fontSize: 24, fontWeight: 'bold', color: '#D4AF37',
-        fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif'
-    },
-    headerSubtitle: {
-        fontSize: 14, color: 'rgba(255,255,255,0.6)', marginTop: 5, fontStyle: 'italic'
-    },
-
-    // BACK BUTTON
-    backButton: {
-        position: 'absolute', left: 20, bottom: 20,
-        flexDirection: 'row', alignItems: 'center'
-    },
-    backButtonText: { color: '#D4AF37', marginLeft: 5, fontSize: 16 },
-
+    // Removed custom header styles
     listContent: { padding: 20 },
 
     // SIMPLE LIST CARD
@@ -136,23 +150,26 @@ const styles = StyleSheet.create({
         flexDirection: 'row', alignItems: 'center', padding: 15
     },
     simpleArabicBox: {
-        width: 95, // Uzun isimler için genişlik artırıldı
-        justifyContent: 'center', alignItems: 'center',
-        marginRight: 10
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        width: 95,
+        marginRight: 15,
     },
     simpleArabic: {
         color: '#D4AF37',
-        fontSize: 26, // Sabit ve dengeli boyut
-        textAlign: 'center',
-        includeFontPadding: false,
-        fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif'
+        fontSize: 22,
+        fontWeight: 'bold',
+        textAlign: 'right',
+        fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+        marginRight: 10
     },
     verticalSeparator: {
-        width: 1,
-        height: 40,
+        width: 2,
+        height: 30,
         backgroundColor: '#D4AF37',
-        marginRight: 15,
-        opacity: 0.5
+        opacity: 0.5,
+        borderRadius: 1
     },
     simpleName: { color: '#fff', fontSize: 18, flex: 1, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
 
@@ -161,11 +178,12 @@ const styles = StyleSheet.create({
         alignItems: 'center', padding: 30
     },
     detailIconContainer: {
-        width: 150, height: 150, borderRadius: 75,
+        width: 180, height: 180, borderRadius: 90, // Büyütüldü
         backgroundColor: 'rgba(212, 175, 55, 0.05)',
         justifyContent: 'center', alignItems: 'center',
         borderWidth: 2, borderColor: 'rgba(212, 175, 55, 0.3)',
-        marginBottom: 30
+        marginBottom: 30,
+        padding: 20 // Padding eklendi
     },
     detailArabicText: {
         fontSize: 60, color: '#D4AF37',
