@@ -4,6 +4,8 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
 import { Alert, Dimensions, FlatList, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
 
@@ -43,6 +45,15 @@ export default function ZikirmatikScreen({ onClose }: { onClose?: () => void }) 
 
   // SAYAÇ OTURUMU
   const [sessionCount, setSessionCount] = useState(0);
+
+  // --- GESTURE DEFINITION ---
+  const panGesture = Gesture.Pan()
+    .onUpdate((e) => {
+      // Sadece aşağı kaydırmayı izle
+      if (e.translationY > 100 && onClose) {
+        runOnJS(onClose)();
+      }
+    });
 
   useEffect(() => {
     loadData();
@@ -151,10 +162,11 @@ export default function ZikirmatikScreen({ onClose }: { onClose?: () => void }) 
 
     return (
       <View style={{ flex: 1, alignItems: 'center', width: '100%' }}>
-        {/* Header - Sol: Kapat, Sağ: Liste */}
+        {/* YENİ HEADER: Sadece Aşağı Ok */}
+        {/* Header - Sol: Kapat */}
         <View style={{ width: '100%', marginBottom: 10, marginTop: 20, paddingHorizontal: 20 }}>
           <ScreenHeader
-            title={activeZikir?.title || "Zikirmatik"}
+            title="Zikirmatik"
             leftIcon="close"
             onLeftPress={onClose}
             centerTitle
@@ -274,19 +286,21 @@ export default function ZikirmatikScreen({ onClose }: { onClose?: () => void }) 
   }
 
   return (
-    <LinearGradient
-      colors={['#0F2027', '#203A43', '#2C5364']}
-      style={styles.container}
-    >
-      <View style={styles.backgroundPatternContainer} pointerEvents="none">
-        <Image source={ICON_PATTERN} style={[styles.bgPatternImage, { left: -150 }]} />
-        <Image source={ICON_PATTERN} style={[styles.bgPatternImage, { right: -150 }]} />
-      </View>
+    <GestureDetector gesture={panGesture}>
+      <LinearGradient
+        colors={['#0F2027', '#203A43', '#2C5364']}
+        style={styles.container}
+      >
+        <View style={styles.backgroundPatternContainer} pointerEvents="none">
+          <Image source={ICON_PATTERN} style={[styles.bgPatternImage, { left: -150 }]} />
+          <Image source={ICON_PATTERN} style={[styles.bgPatternImage, { right: -150 }]} />
+        </View>
 
-      <SafeAreaView style={{ flex: 1, alignItems: 'center', width: '100%' }} edges={['top']}>
-        {viewMode === 'LIST' ? renderList() : renderCounter()}
-      </SafeAreaView>
-    </LinearGradient>
+        <SafeAreaView style={{ flex: 1, alignItems: 'center', width: '100%' }} edges={['top']}>
+          {viewMode === 'LIST' ? renderList() : renderCounter()}
+        </SafeAreaView>
+      </LinearGradient>
+    </GestureDetector>
   );
 }
 
@@ -299,6 +313,8 @@ const styles = StyleSheet.create({
 
   // HEADER ICON
   iconButton: { padding: 5 },
+
+
 
   // --- LİSTE STİLLERİ ---
   zikirItem: {

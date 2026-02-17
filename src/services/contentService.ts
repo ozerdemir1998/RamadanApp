@@ -1,4 +1,4 @@
-import { doc, getDoc, getFirestore } from 'firebase/firestore';
+import { doc, getDoc, getDocFromServer, getFirestore } from 'firebase/firestore';
 import { app } from '../../src/config/firebaseConfig';
 
 const db = getFirestore(app);
@@ -34,7 +34,16 @@ export const fetchDailyContent = async (customDate?: string): Promise<DailyStory
     console.log(`🔥 Firebase'den veri çekiliyor: ${docId}`);
 
     const docRef = doc(db, 'daily_stories', docId);
-    const docSnap = await getDoc(docRef);
+
+    // Önce sunucudan güncel (Türkçe) veriyi almaya çalış
+    let docSnap;
+    try {
+      docSnap = await getDocFromServer(docRef);
+    } catch (e) {
+      console.warn("Sunucudan veri alınamadı, cache'e bakılıyor...", e);
+      // İnternet yoksa cache'den al
+      docSnap = await getDoc(docRef);
+    }
 
     if (docSnap.exists()) {
       const data = docSnap.data();

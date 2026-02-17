@@ -134,7 +134,9 @@ export default function LifeScreen() {
                   </View>
                   <View style={styles.textContent}>
                     <Text style={styles.cardTitle}>Günün Ayeti</Text>
-                    <Text style={styles.cardSubtitle}>{ayet?.subTitle || "Yükleniyor..."}</Text>
+                    <Text style={styles.cardSubtitle}>
+                      {(!ayet?.subTitle || /[\u0600-\u06FF]/.test(ayet.subTitle)) ? "Yükleniyor..." : ayet.subTitle}
+                    </Text>
                   </View>
                   <View style={[styles.arrowContainer, { backgroundColor: 'rgba(212, 175, 55, 0.1)' }]}>
                     <Ionicons name="chevron-forward" size={20} color="#D4AF37" />

@@ -2,6 +2,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
 import { Alert, Dimensions, Image, Linking, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
@@ -259,28 +260,30 @@ export default function MenuScreen() {
           animationType="none" // Native animasyonu kapat
           onRequestClose={closeModal}
         >
-          {/* Backdrop (Karanlık Arka Plan) */}
-          <Animated.View style={[
-            StyleSheet.absoluteFillObject,
-            { backgroundColor: 'rgba(0,0,0,0.5)' },
-            animatedBackdropStyle
-          ]} />
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            {/* Backdrop (Karanlık Arka Plan) */}
+            <Animated.View style={[
+              StyleSheet.absoluteFillObject,
+              { backgroundColor: 'rgba(0,0,0,0.5)' },
+              animatedBackdropStyle
+            ]} />
 
-          {/* İçerik Container (Slide Up) */}
-          <Animated.View style={[
-            { flex: 1, backgroundColor: '#0F2027', marginTop: Platform.OS === 'ios' ? 40 : 0, borderTopLeftRadius: 20, borderTopRightRadius: 20, overflow: 'hidden' },
-            animatedModalStyle
-          ]}>
+            {/* İçerik Container (Slide Up) */}
+            <Animated.View style={[
+              { flex: 1, backgroundColor: '#0F2027', marginTop: Platform.OS === 'ios' ? 40 : 0, borderTopLeftRadius: 20, borderTopRightRadius: 20, overflow: 'hidden' },
+              animatedModalStyle
+            ]}>
 
-            {/* İçerik Render */}
-            {activeScreen === 'NAMAZ_VISUAL' && <NamazVisualScreen onClose={closeModal} />}
-            {activeScreen === 'ABDEST_VISUAL' && <AbdestVisualScreen onClose={closeModal} />}
-            {activeScreen === 'ESMAUL_HUSNA' && <EsmaulHusnaScreen onClose={closeModal} />}
-            {activeScreen === 'QIBLA' && <QiblaScreen onClose={closeModal} />}
-            {activeScreen === 'ZIKIRMATIK' && <ZikirmatikScreen onClose={closeModal} />}
-            {activeScreen === 'KAZA_TAKIP' && <KazaTakipScreen onClose={closeModal} />}
+              {/* İçerik Render */}
+              {activeScreen === 'NAMAZ_VISUAL' && <NamazVisualScreen onClose={closeModal} />}
+              {activeScreen === 'ABDEST_VISUAL' && <AbdestVisualScreen onClose={closeModal} />}
+              {activeScreen === 'ESMAUL_HUSNA' && <EsmaulHusnaScreen onClose={closeModal} />}
+              {activeScreen === 'QIBLA' && <QiblaScreen onClose={closeModal} />}
+              {activeScreen === 'ZIKIRMATIK' && <ZikirmatikScreen onClose={closeModal} />}
+              {activeScreen === 'KAZA_TAKIP' && <KazaTakipScreen onClose={closeModal} />}
 
-          </Animated.View>
+            </Animated.View>
+          </GestureHandlerRootView>
         </Modal>
 
       </SafeAreaView>
