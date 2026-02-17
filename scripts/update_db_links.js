@@ -40,7 +40,7 @@ async function updateLinks() {
     });
 
     // 2. Scan directory
-    const files = fs.readdirSync(CONFIG.IMAGE_DIR).filter(f => f.endsWith('.png') && !f.startsWith('Gemini_'));
+    const files = fs.readdirSync(CONFIG.IMAGE_DIR).filter(f => (f.endsWith('.png') || f.endsWith('.jpg')) && !f.startsWith('Gemini_'));
 
     console.log(`📂 Found ${files.length} successfully renamed images.`);
 
@@ -48,7 +48,7 @@ async function updateLinks() {
     let notFoundCount = 0;
 
     for (const file of files) {
-        const slug = file.replace('.png', '').replace(/-\d+$/, ''); // remove extension and any suffix like -2
+        const slug = file.replace(/\.(png|jpg)$/, '').replace(/-\d+$/, ''); // remove extension and any suffix like -2
 
         // Find matching recipe
         const docId = recipeMap[slug];

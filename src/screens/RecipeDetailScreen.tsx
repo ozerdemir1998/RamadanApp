@@ -1,13 +1,16 @@
 import { fetchRecipeDetail } from '@/services/recipeService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Image, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context'; // EKLENDİ
+import { ActivityIndicator, Dimensions, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
 
 const { width } = Dimensions.get('window');
+const blurhash =
+    '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuwH';
 
 export default function RecipeDetailScreen() {
     const { recipeId } = useLocalSearchParams();
@@ -16,12 +19,10 @@ export default function RecipeDetailScreen() {
     const [recipe, setRecipe] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    // EKLENDİ: Güvenli alanları al
     const insets = useSafeAreaInsets();
 
     // Çevrilmiş Metinler
     const [trName, setTrName] = useState("");
-    const [trInstructions, setTrInstructions] = useState("");
 
     useEffect(() => {
         loadDetail();
@@ -32,16 +33,13 @@ export default function RecipeDetailScreen() {
         if (!data) return;
 
         setRecipe(data);
-        // Veriler zaten Türkçe olduğu için çeviriye gerek yok
         setTrName(data.title);
-        setTrInstructions(data.instructions);
         setLoading(false);
     };
 
     if (loading) {
         return (
             <View style={styles.loadingCenter}>
-                {/* Yüklenirken de header gizli olsun */}
                 <Stack.Screen options={{ headerShown: false }} />
                 <ActivityIndicator size="large" color="#D4AF37" />
                 <Text style={styles.loadingText}>Tarif Hazırlanıyor...</Text>
@@ -53,7 +51,6 @@ export default function RecipeDetailScreen() {
 
     return (
         <View style={styles.container}>
-            {/* --- BEYAZ BAŞLIĞI GİZLER --- */}
             <Stack.Screen options={{ headerShown: false }} />
 
             <View style={{ paddingTop: 15, backgroundColor: '#0F2027' }}>
@@ -66,13 +63,15 @@ export default function RecipeDetailScreen() {
 
             <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
 
-                {/* 1. RESİM ALANI (HEADER) - Title removed from here */}
+                {/* 1. RESİM ALANI (HEADER) */}
                 <View style={styles.imageHeader}>
                     {recipe.image ? (
                         <Image
                             source={{ uri: recipe.image }}
                             style={styles.foodImage}
-                            resizeMode="cover"
+                            contentFit="cover"
+                            placeholder={blurhash}
+                            transition={500}
                         />
                     ) : (
                         <View style={[styles.foodImage, { backgroundColor: '#203A43', justifyContent: 'center', alignItems: 'center' }]}>
@@ -80,7 +79,6 @@ export default function RecipeDetailScreen() {
                         </View>
                     )}
 
-                    {/* Alt Kısım Karartma */}
                     <LinearGradient
                         colors={['transparent', '#0F2027']}
                         style={styles.bottomGradient}
@@ -90,39 +88,38 @@ export default function RecipeDetailScreen() {
                 {/* 2. İÇERİK (KOYU TEMA) */}
                 <LinearGradient colors={['#0F2027', '#203A43']} style={styles.contentBody}>
 
-                    {/* YAPILIŞI */}
-                    <View style={styles.sectionBox}>
-                        <View style={styles.sectionHeaderRow}>
-                            <MaterialCommunityIcons name="chef-hat" size={24} color="#D4AF37" />
-                            <Text style={styles.sectionHeader}>Yapılışı</Text>
-                        </View>
-                        <Text style={styles.detailText}>
-                            {recipe.instructions}
-                        </Text>
-                    </View>
-
-                    {/* MALZEMELER */}
+                    {/* MALZEMELER - Pills Logic */}
                     <View style={styles.sectionBox}>
                         <View style={styles.sectionHeaderRow}>
                             <MaterialCommunityIcons name="basket" size={24} color="#D4AF37" />
                             <Text style={styles.sectionHeader}>Malzemeler</Text>
                         </View>
 
-                        <View style={styles.ingredientsList}>
+                        <View style={styles.ingredientsPillsContainer}>
                             {recipe.ingredients && recipe.ingredients.map((ing: string, i: number) => (
-                                <IngredientRow
-                                    key={i}
-                                    ingredient={ing}
-                                    measure="" // Artık hepsi string içinde
-                                />
+                                <View key={i} style={styles.ingredientPill}>
+                                    <View style={styles.pillDot} />
+                                    <Text style={styles.ingredientPillText}>{ing}</Text>
+                                </View>
                             ))}
                         </View>
                     </View>
 
-                    {/* DİNAMİK ALT BOŞLUK (EKLENDİ)
-               Menünün altında kalmaması için:
-               Tab Bar Yüksekliği (~85px) + Güvenli Alan (insets.bottom)
-            */}
+                    {/* YAPILIŞI - Step Logic */}
+                    <View style={styles.sectionBox}>
+                        <View style={styles.sectionHeaderRow}>
+                            <MaterialCommunityIcons name="chef-hat" size={24} color="#D4AF37" />
+                            <Text style={styles.sectionHeader}>Yapılışı</Text>
+                        </View>
+
+                        <View style={styles.instructionsContainer}>
+                            <Text style={styles.detailText}>
+                                {recipe.instructions}
+                            </Text>
+                        </View>
+                    </View>
+
+                    {/* DİNAMİK ALT BOŞLUK */}
                     <View style={{ height: 85 + insets.bottom }} />
 
                 </LinearGradient>
@@ -132,18 +129,6 @@ export default function RecipeDetailScreen() {
     );
 }
 
-// Alt Bileşen (Malzeme Satırı)
-const IngredientRow = ({ ingredient, measure }: { ingredient: string, measure: string }) => {
-    return (
-        <View style={styles.ingredientRow}>
-            <View style={styles.bulletPoint} />
-            <Text style={styles.ingredientText}>
-                {ingredient}
-            </Text>
-        </View>
-    );
-};
-
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#0F2027' },
     scrollContainer: { paddingBottom: 0 },
@@ -152,56 +137,73 @@ const styles = StyleSheet.create({
     loadingText: { color: '#D4AF37', marginTop: 10 },
 
     // GÖRSEL ALANI
-    imageHeader: { height: 380, width: '100%', position: 'relative' }, // Resim boyutu biraz artırıldı
+    imageHeader: { height: 380, width: '100%', position: 'relative' },
     foodImage: { width: '100%', height: '100%' },
 
-    topGradient: { position: 'absolute', top: 0, left: 0, right: 0, height: 100 },
-
-    // Alt Gradient Ayarları (Yazıların görünmesi için)
+    // Alt Gradient
     bottomGradient: {
         position: 'absolute', bottom: 0, left: 0, right: 0,
-        height: 180, // Gradient alanı büyütüldü
+        height: 180,
         justifyContent: 'flex-end',
         padding: 20,
-        paddingBottom: 45 // Yazıları yukarı itmek için (ContentBody üzerine binmesin diye)
-    },
-
-    backBtnAbsolute: { position: 'absolute', top: 50, left: 20, zIndex: 10 },
-    backBtnCircle: {
-        width: 40, height: 40, borderRadius: 20,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'center', alignItems: 'center',
-        borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.5)'
-    },
-
-    imageTitle: {
-        fontSize: 28, fontWeight: 'bold', color: '#fff',
-        fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-        textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 10, // Yazı gölgesi artırıldı
-        marginBottom: 5
-    },
-    imageSubTitle: {
-        fontSize: 16, color: '#D4AF37', fontWeight: '600',
-        textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 5
+        paddingBottom: 45
     },
 
     // İÇERİK GÖVDESİ
     contentBody: {
-        marginTop: -30, // Resmin üzerine hafif bindirme (Yuvarlak köşeler için)
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
+        marginTop: -40,
+        borderTopLeftRadius: 32,
+        borderTopRightRadius: 32,
         padding: 25,
-        minHeight: 500
+        minHeight: 500,
+        paddingTop: 35
     },
 
-    sectionBox: { marginBottom: 30 },
-    sectionHeaderRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 15, gap: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(212, 175, 55, 0.2)', paddingBottom: 10 },
+    sectionBox: { marginBottom: 35 },
+    sectionHeaderRow: {
+        flexDirection: 'row', alignItems: 'center', marginBottom: 15, gap: 10,
+        borderBottomWidth: 1, borderBottomColor: 'rgba(212, 175, 55, 0.2)', paddingBottom: 10
+    },
     sectionHeader: { fontSize: 20, fontWeight: 'bold', color: '#D4AF37', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
 
-    detailText: { fontSize: 16, color: 'rgba(255,255,255,0.8)', lineHeight: 26, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+    detailText: {
+        fontSize: 16, color: 'rgba(255,255,255,0.8)', lineHeight: 28,
+        fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif'
+    },
+    instructionsContainer: {
+        backgroundColor: 'rgba(255,255,255,0.03)',
+        padding: 15,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.05)'
+    },
 
-    ingredientsList: { marginTop: 5 },
-    ingredientRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-    bulletPoint: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#D4AF37', marginRight: 10 },
-    ingredientText: { fontSize: 16, color: 'rgba(255,255,255,0.9)', flex: 1 },
+    // Ingredients Pills
+    ingredientsPillsContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 10
+    },
+    ingredientPill: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(212, 175, 55, 0.15)',
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: 'rgba(212, 175, 55, 0.3)'
+    },
+    pillDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: '#D4AF37',
+        marginRight: 8
+    },
+    ingredientPillText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '500'
+    }
 });
