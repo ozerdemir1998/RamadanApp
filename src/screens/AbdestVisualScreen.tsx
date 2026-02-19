@@ -1,16 +1,17 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
-import { Dimensions, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
+import { Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import CloseButton from '../components/CloseButton';
 import ScreenHeader from '../components/ScreenHeader';
+import { rf, scale, SCREEN_DIMENSIONS, verticalScale } from '../utils/responsive';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const { width } = Dimensions.get('window');
+const { width } = SCREEN_DIMENSIONS;
 
 // --- TİP TANIMLARI ---
 type AbdestStep = {
@@ -234,61 +235,60 @@ export default function AbdestVisualScreen({ onClose }: { onClose: () => void })
 }
 
 const styles = StyleSheet.create({
-    // --- NAMAZ VISUAL SCREEN HEADER STYLE REPLİKASYONU ---
-    slideHeader: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 10 },
+    slideHeader: { paddingHorizontal: scale(20), paddingTop: verticalScale(10), paddingBottom: verticalScale(10) },
     headerControls: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
 
     backButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        minWidth: 60, // Ensure clickable area
+        minWidth: scale(60),
     },
     backButtonText: {
         color: '#D4AF37',
-        fontSize: 16,
-        marginLeft: 5,
+        fontSize: rf(16),
+        marginLeft: scale(5),
     },
 
     // MENÜ STİLLERİ
     menuContainer: {
-        padding: 20,
+        padding: scale(20),
     },
     menuSubtitle: {
         color: 'rgba(255,255,255,0.6)',
-        marginBottom: 20,
+        marginBottom: verticalScale(20),
         textAlign: 'center',
-        fontSize: 14
+        fontSize: rf(14)
     },
     menuCard: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: 'rgba(255,255,255,0.05)',
-        padding: 20,
-        borderRadius: 16,
-        marginBottom: 15,
+        padding: scale(20),
+        borderRadius: scale(16),
+        marginBottom: verticalScale(15),
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.1)',
     },
     menuIconBox: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
+        width: scale(50),
+        height: scale(50),
+        borderRadius: scale(25),
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 15,
+        marginRight: scale(15),
     },
     menuCardContent: {
         flex: 1,
     },
     menuCardTitle: {
         color: '#fff',
-        fontSize: 18,
+        fontSize: rf(18),
         fontWeight: 'bold',
-        marginBottom: 5,
+        marginBottom: verticalScale(5),
     },
     menuCardDesc: {
         color: 'rgba(255,255,255,0.5)',
-        fontSize: 12,
+        fontSize: rf(12),
     },
 
     // REHBER STİLLERİ
@@ -296,23 +296,23 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'flex-start',
-        paddingHorizontal: 30,
-        paddingTop: 40, // NamazVisualScreen'de textContainer için kullanılan boşluğa benzer
-        paddingBottom: 20,
+        paddingHorizontal: scale(30),
+        paddingTop: verticalScale(40),
+        paddingBottom: verticalScale(20),
     },
 
     visualContainer: {
-        marginBottom: 40,
+        marginBottom: verticalScale(40),
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
+        shadowOffset: { width: 0, height: verticalScale(10) },
         shadowOpacity: 0.3,
-        shadowRadius: 20,
+        shadowRadius: scale(20),
         elevation: 10,
     },
     iconCircle: {
-        width: 180,
-        height: 180,
-        borderRadius: 90,
+        width: scale(180),
+        height: scale(180),
+        borderRadius: scale(90),
         borderWidth: 2,
         justifyContent: 'center',
         alignItems: 'center',
@@ -324,35 +324,35 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     stepTitle: {
-        fontSize: 24,
+        fontSize: rf(24),
         fontWeight: 'bold',
-        marginBottom: 15,
+        marginBottom: verticalScale(15),
         fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
         textAlign: 'center',
     },
     stepDesc: {
         color: 'rgba(255,255,255,0.8)',
-        fontSize: 16,
+        fontSize: rf(16),
         textAlign: 'center',
-        lineHeight: 24,
-        minHeight: 120, // Prevent jumping text
+        lineHeight: rf(24),
+        minHeight: verticalScale(120),
     },
 
     // FOOTER STİLLERİ
     footerContainer: {
         alignItems: 'center',
         justifyContent: 'center',
-        paddingBottom: 20,
+        paddingBottom: verticalScale(20),
         width: '100%',
     },
     stepCounter: {
         color: 'rgba(255,255,255,0.5)',
-        fontSize: 18,
+        fontSize: rf(18),
         fontWeight: 'bold',
-        marginBottom: 5,
+        marginBottom: verticalScale(5),
     },
     tapHintFooter: {
         color: 'rgba(255,255,255,0.3)',
-        fontSize: 12,
+        fontSize: rf(12),
     }
 });

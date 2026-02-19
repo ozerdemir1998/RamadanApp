@@ -1,10 +1,11 @@
 import axios from 'axios';
 import { collection, getDocs, getFirestore } from 'firebase/firestore';
 import { app } from '../config/firebaseConfig';
+import { CACHE_DURATIONS, getFromCache, setCache } from './cacheService';
 
 const db = getFirestore(app);
 
-const BASE_URL = 'http://api.alquran.cloud/v1';
+const BASE_URL = 'https://api.alquran.cloud/v1';
 
 export interface Surah {
     number: number;
@@ -30,9 +31,13 @@ export interface Ayah {
 }
 
 export const quranService = {
-    // Firebase'den Türkçe Sure İsimlerini Çek
+    // Firebase'den Türkçe Sure İsimlerini Çek (7 gün cache)
     async getSurahNamesMap(): Promise<Record<number, string>> {
         try {
+            const cacheKey = 'surah_names_map';
+            const cached = await getFromCache<Record<number, string>>(cacheKey, CACHE_DURATIONS.ONE_WEEK);
+            if (cached) return cached;
+
             const querySnapshot = await getDocs(collection(db, "surah_names"));
             const namesMap: Record<number, string> = {};
             querySnapshot.forEach((doc) => {
@@ -41,6 +46,8 @@ export const quranService = {
                     namesMap[data.id] = data.name;
                 }
             });
+
+            await setCache(cacheKey, namesMap);
             return namesMap;
         } catch (error) {
             console.error("Error fetching surah names from Firebase:", error);
@@ -48,28 +55,34 @@ export const quranService = {
         }
     },
 
-    // Tüm Sureleri Listele
+    // Tüm Sureleri Listele (1 gün cache)
     async getSurahs(): Promise<Surah[]> {
         try {
+            const cacheKey = 'surah_list';
+            const cached = await getFromCache<Surah[]>(cacheKey, CACHE_DURATIONS.ONE_DAY);
+            if (cached) return cached;
+
             const response = await axios.get(`${BASE_URL}/surah`);
-            return response.data.data;
+            const data = response.data.data;
+
+            await setCache(cacheKey, data);
+            return data;
         } catch (error) {
             console.error('Error fetching surahs:', error);
             return [];
         }
     },
 
-    // Sure Detayını Getir (Arapça + Türkçe + Ses)
+    // Sure Detayını Getir (Arapça + Türkçe + Ses) - 1 gün cache
     async getSurahDetails(surahNumber: number): Promise<Ayah[]> {
         try {
-            // 3 farklı edisyonu aynı anda çekiyoruz:
-            // 1. quran-uthmani (Arapça Metin)
-            // 2. tr.diyanet (Türkçe Meal)
-            // 3. ar.alafasy (Ses - Ayet Ayet)
+            const cacheKey = `surah_detail_${surahNumber}`;
+            const cached = await getFromCache<Ayah[]>(cacheKey, CACHE_DURATIONS.ONE_DAY);
+            if (cached) return cached;
+
             const response = await axios.get(`${BASE_URL}/surah/${surahNumber}/editions/quran-uthmani,tr.diyanet,ar.alafasy`);
             const data = response.data.data;
 
-            // Data array içinde 3 obje döner. Sıralamayı garanti edelim veya edisyon adına göre bulalım.
             const arabicData = data.find((d: any) => d.edition.identifier === 'quran-uthmani');
             const translationData = data.find((d: any) => d.edition.identifier === 'tr.diyanet');
             const audioData = data.find((d: any) => d.edition.identifier === 'ar.alafasy');
@@ -78,7 +91,6 @@ export const quranService = {
                 throw new Error('Eksik veri');
             }
 
-            // Verileri birleştirip tek bir Ayah listesi oluşturalım
             const ayahs: Ayah[] = arabicData.ayahs.map((ayah: any, index: number) => {
                 return {
                     number: ayah.number,
@@ -95,6 +107,7 @@ export const quranService = {
                 };
             });
 
+            await setCache(cacheKey, ayahs);
             return ayahs;
 
         } catch (error) {

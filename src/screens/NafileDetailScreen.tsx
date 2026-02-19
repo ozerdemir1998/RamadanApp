@@ -6,6 +6,7 @@ import { ActivityIndicator, Platform, ScrollView, StatusBar, StyleSheet, Text, T
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
 import { fetchNafileDetail, NafileNamaz } from '../services/nafileService';
+import { rf, scale, verticalScale } from '../utils/responsive';
 
 export default function NafileDetailScreen() {
     const { id } = useLocalSearchParams();
@@ -114,20 +115,20 @@ const styles = StyleSheet.create({
     },
     errorText: {
         color: '#fff',
-        fontSize: 16,
-        marginBottom: 20,
+        fontSize: rf(16),
+        marginBottom: verticalScale(20),
     },
     shareButton: {
-        padding: 8,
+        padding: scale(8),
     },
     content: {
-        padding: 20,
+        padding: scale(20),
     },
     card: {
         backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        borderRadius: 16,
-        padding: 20,
-        marginBottom: 20,
+        borderRadius: scale(16),
+        padding: scale(20),
+        marginBottom: verticalScale(20),
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.1)',
     },
@@ -138,18 +139,18 @@ const styles = StyleSheet.create({
     cardHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 15,
+        marginBottom: verticalScale(15),
     },
     cardTitle: {
-        fontSize: 18,
+        fontSize: rf(18),
         fontWeight: 'bold',
         color: '#D4AF37',
-        marginLeft: 10,
+        marginLeft: scale(10),
         fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
     },
     cardText: {
-        fontSize: 15,
+        fontSize: rf(15),
         color: 'rgba(255, 255, 255, 0.8)',
-        lineHeight: 24,
+        lineHeight: rf(24),
     },
 });

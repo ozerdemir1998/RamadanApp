@@ -3,15 +3,16 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
 import { Magnetometer } from 'expo-sensors';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Dimensions, Image, Platform, StyleSheet, Text, View } from 'react-native';
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { ActivityIndicator, Alert, Image, Platform, StyleSheet, Text, View } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import ScreenHeader from '../components/ScreenHeader';
+import { rf, scale, SCREEN_DIMENSIONS, verticalScale } from '../utils/responsive';
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = SCREEN_DIMENSIONS;
 // Pusula boyutunu ekranın hem enine hem boyuna göre sınırla
-const COMPASS_SIZE = Math.min(width * 0.8, height * 0.45);
+const COMPASS_SIZE = Math.min(width * 0.72, height * 0.38);
 
 // --- İKON ---
 const ICON_PATTERN = require('../../assets/icons/compass.png');
@@ -31,14 +32,16 @@ export default function QiblaScreen({ onClose }: { onClose?: () => void }) {
   // Refs for listener
   const qiblaBearingRef = useRef(0);
   const lastHeadingRef = useRef(0);
+  const lastUpdateTimeRef = useRef(0);
 
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
     initQibla();
 
-    // Manyetometre Ayarları
-    Magnetometer.setUpdateInterval(20); // 50Hz (Daha akıcı)
+    // Manyetometre - Android için daha düşük güncelleme hızı (100ms = 10Hz)
+    // 20ms (50Hz) çoğu Android'de performans sorunu yaratır
+    Magnetometer.setUpdateInterval(100);
 
     const subscription = Magnetometer.addListener((data) => {
       let { x, y } = data;
@@ -48,20 +51,26 @@ export default function QiblaScreen({ onClose }: { onClose?: () => void }) {
       angle = angle - 90;
       angle = (angle + 360) % 360;
 
-      // Low Pass Filter (Yumuşatma) - Reanimated ile
-      headingSV.value = withTiming(angle, {
-        duration: 100, // 100ms gecikme ile yumuşat
-        easing: Easing.linear
-      });
+      // Low-pass filter ile yumuşatma
+      const prev = headingSV.value;
+      let delta = angle - prev;
+      // En kısa yoldan dön (360 → 0 geçişi)
+      if (delta > 180) delta -= 360;
+      if (delta < -180) delta += 360;
+      const smoothed = prev + delta * 0.3; // 0.3 smoothing factor
+      const normalized = ((smoothed % 360) + 360) % 360;
 
-      // Metin güncellemesini throttle edelim
-      if (Math.abs(angle - lastHeadingRef.current) > 1) {
-        lastHeadingRef.current = angle;
-        setDisplayHeading(Math.round(angle));
+      headingSV.value = normalized;
+
+      // Metin güncellemesini throttle edelim (her 150ms)
+      const now = Date.now();
+      if (now - lastUpdateTimeRef.current > 150) {
+        lastUpdateTimeRef.current = now;
+        setDisplayHeading(Math.round(normalized));
 
         // Calculate alignment
         const bearing = qiblaBearingRef.current;
-        const diff = (bearing - angle + 360) % 360;
+        const diff = (bearing - normalized + 360) % 360;
         const aligned = diff < 5 || diff > 355;
         setIsAligned(aligned);
       }
@@ -70,7 +79,7 @@ export default function QiblaScreen({ onClose }: { onClose?: () => void }) {
     return () => {
       subscription && subscription.remove();
     };
-  }, []); // Empty dependency array fixed the infinite loop!
+  }, []);
 
   const initQibla = async () => {
     try {
@@ -81,7 +90,10 @@ export default function QiblaScreen({ onClose }: { onClose?: () => void }) {
         return;
       }
 
-      let location = await Location.getCurrentPositionAsync({});
+      // Daha hızlı konum al - düşük doğruluk yeterli
+      let location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
       const { latitude, longitude } = location.coords;
 
       const KAABA_LAT = 21.422487;
@@ -153,9 +165,9 @@ export default function QiblaScreen({ onClose }: { onClose?: () => void }) {
         <Image source={ICON_PATTERN} style={[styles.bgPatternImage, { right: -150 }]} />
       </View>
 
-      <View style={{ flex: 1, paddingTop: 25 }}>
+      <View style={{ flex: 1, paddingTop: verticalScale(15) }}>
 
-        {/* 1. Header Container (Height Fix) */}
+        {/* 1. Header Container */}
         <View style={{ zIndex: 10 }}>
           <ScreenHeader
             title="Kıble"
@@ -167,13 +179,13 @@ export default function QiblaScreen({ onClose }: { onClose?: () => void }) {
           />
         </View>
 
-        {/* 2. Main Content Area (Flex to take remaining space) */}
+        {/* 2. Main Content Area */}
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
 
           {loading ? (
             <View style={styles.centerContent}>
               <ActivityIndicator size="large" color="#D4AF37" />
-              <Text style={{ color: '#D4AF37', marginTop: 10 }}>Konum Hesaplanıyor...</Text>
+              <Text style={{ color: '#D4AF37', marginTop: verticalScale(10), fontSize: rf(14) }}>Konum Hesaplanıyor...</Text>
             </View>
           ) : (
             <>
@@ -181,17 +193,17 @@ export default function QiblaScreen({ onClose }: { onClose?: () => void }) {
               <View style={styles.compassContainer}>
                 <View style={[styles.compassBorder, isAligned && styles.alignedBorder]}>
                   <Animated.View style={[styles.cardinalsLayer, animatedCompassStyle]}>
-                    <Text style={[styles.directionText, { top: 15, alignSelf: 'center', color: '#D4AF37' }]}>N</Text>
-                    <Text style={[styles.directionText, { bottom: 15, alignSelf: 'center' }]}>S</Text>
-                    <Text style={[styles.directionText, { left: 15, top: '50%', marginTop: -10 }]}>W</Text>
-                    <Text style={[styles.directionText, { right: 15, top: '50%', marginTop: -10 }]}>E</Text>
+                    <Text style={[styles.directionText, { top: scale(12), alignSelf: 'center', color: '#D4AF37' }]}>N</Text>
+                    <Text style={[styles.directionText, { bottom: scale(12), alignSelf: 'center' }]}>S</Text>
+                    <Text style={[styles.directionText, { left: scale(12), top: '50%', marginTop: rf(-8) }]}>W</Text>
+                    <Text style={[styles.directionText, { right: scale(12), top: '50%', marginTop: rf(-8) }]}>E</Text>
                   </Animated.View>
 
                   <Animated.View style={[styles.rotatingLayer, animatedArrowStyle]}>
                     <View style={styles.arrowWrapper}>
                       <MaterialCommunityIcons
                         name="arrow-up-bold"
-                        size={50}
+                        size={rf(36)}
                         color={isAligned ? "#00FF00" : "#D4AF37"}
                         style={isAligned ? styles.glowingArrow : {}}
                       />
@@ -199,12 +211,12 @@ export default function QiblaScreen({ onClose }: { onClose?: () => void }) {
                   </Animated.View>
 
                   <View style={styles.centerPiece}>
-                    <FontAwesome5 name="kaaba" size={60} color={isAligned ? "#D4AF37" : "rgba(212, 175, 55, 0.4)"} />
+                    <FontAwesome5 name="kaaba" size={rf(40)} color={isAligned ? "#D4AF37" : "rgba(212, 175, 55, 0.4)"} />
                   </View>
                 </View>
               </View>
 
-              {/* FOOTER - İçerik alanının altında, boşluk bırakarak */}
+              {/* FOOTER */}
               <View style={styles.footer}>
                 <Text style={styles.degreeText}>{displayHeading}°</Text>
                 <Text style={[styles.infoText, isAligned && { color: '#00FF00', fontWeight: 'bold' }]}>
@@ -224,11 +236,11 @@ export default function QiblaScreen({ onClose }: { onClose?: () => void }) {
 
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0F2027' },
-  centerContent: { flex: 1, justifyContent: 'center', alignItems: 'center' }, // Added for loading state inside SafeAreaView
+  centerContent: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 
   // ARKAPLAN
   backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
-  bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.05, tintColor: '#D4AF37', resizeMode: 'contain' },
+  bgPatternImage: { position: 'absolute', width: scale(300), height: scale(300), opacity: 0.05, tintColor: '#D4AF37', resizeMode: 'contain' },
 
   // PUSULA
   compassContainer: {
@@ -270,7 +282,7 @@ const styles = StyleSheet.create({
   directionText: {
     position: 'absolute',
     color: 'rgba(255, 255, 255, 0.3)',
-    fontSize: 18,
+    fontSize: rf(16),
     fontWeight: 'bold',
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
@@ -284,7 +296,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   arrowWrapper: {
-    marginTop: 15,
+    marginTop: scale(12),
     shadowColor: "#D4AF37",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.5,
@@ -297,9 +309,9 @@ const styles = StyleSheet.create({
 
   // MERKEZ
   centerPiece: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: scale(90),
+    height: scale(90),
+    borderRadius: scale(45),
     backgroundColor: 'rgba(212, 175, 55, 0.05)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -308,8 +320,8 @@ const styles = StyleSheet.create({
   },
 
   // FOOTER
-  footer: { alignItems: 'center', marginTop: 30, paddingBottom: 20 },
-  degreeText: { fontSize: 56, color: '#fff', fontWeight: '300', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
-  subInfoText: { color: 'rgba(255,255,255,0.4)', fontSize: 14, marginTop: 5 },
-  infoText: { color: '#D4AF37', fontSize: 20, marginTop: 5, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', fontWeight: '600' }
+  footer: { alignItems: 'center', marginTop: verticalScale(20), paddingBottom: verticalScale(15) },
+  degreeText: { fontSize: rf(40), color: '#fff', fontWeight: '300', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
+  subInfoText: { color: 'rgba(255,255,255,0.4)', fontSize: rf(12), marginTop: verticalScale(4) },
+  infoText: { color: '#D4AF37', fontSize: rf(16), marginTop: verticalScale(4), fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', fontWeight: '600' }
 });

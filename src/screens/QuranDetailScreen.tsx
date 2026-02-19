@@ -7,6 +7,7 @@ import { ActivityIndicator, Dimensions, FlatList, Platform, ScrollView, StyleShe
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
 import { Ayah, quranService } from '../services/quranService';
+import { rf, scale, SCREEN_DIMENSIONS, verticalScale } from '../utils/responsive';
 
 // ... (imports remain the same)
 
@@ -374,12 +375,12 @@ const styles = StyleSheet.create({
     // HEADER styles removed
 
     loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    listContent: { padding: 20, paddingBottom: 100 },
+    listContent: { padding: scale(18), paddingBottom: verticalScale(100) },
 
     ayahContainer: {
-        marginBottom: 25,
-        padding: 15,
-        borderRadius: 16,
+        marginBottom: verticalScale(20),
+        padding: scale(14),
+        borderRadius: scale(16),
         backgroundColor: 'rgba(255,255,255,0.02)',
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.05)'
@@ -393,34 +394,34 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: 15,
+        marginBottom: verticalScale(12),
     },
     playButtonMini: {
-        width: 30, height: 30, borderRadius: 15,
+        width: scale(28), height: scale(28), borderRadius: scale(14),
         backgroundColor: 'rgba(212, 175, 55, 0.1)',
         justifyContent: 'center', alignItems: 'center'
     },
     ayahNumberBadge: {
-        width: 30, height: 30, borderRadius: 15,
+        width: scale(28), height: scale(28), borderRadius: scale(14),
         borderWidth: 1, borderColor: '#D4AF37',
         justifyContent: 'center', alignItems: 'center'
     },
-    ayahNumberText: { color: '#D4AF37', fontSize: 12, fontWeight: 'bold' },
+    ayahNumberText: { color: '#D4AF37', fontSize: rf(11), fontWeight: 'bold' },
 
     arabicText: {
         color: '#fff',
-        fontSize: 26,
-        lineHeight: 45,
+        fontSize: rf(24),
+        lineHeight: rf(40),
         textAlign: 'right',
         fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-        marginBottom: 15
+        marginBottom: verticalScale(12)
     },
     activeText: { color: '#FFD700' },
 
     translationText: {
         color: 'rgba(255,255,255,0.8)',
-        fontSize: 16,
-        lineHeight: 24,
+        fontSize: rf(15),
+        lineHeight: rf(22),
         textAlign: 'left'
     },
     activeTranslation: { color: '#fff' },
@@ -429,12 +430,12 @@ const styles = StyleSheet.create({
     playerBar: {
         position: 'absolute',
         bottom: 0, left: 0, right: 0,
-        height: 80,
+        height: verticalScale(70),
         backgroundColor: '#1c1c1c',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 25,
+        paddingHorizontal: scale(22),
         borderTopWidth: 1,
         borderTopColor: 'rgba(255,255,255,0.1)',
         elevation: 10,
@@ -443,11 +444,11 @@ const styles = StyleSheet.create({
         shadowRadius: 10
     },
     playerInfo: { flex: 1 },
-    playerSurahName: { color: '#D4AF37', fontSize: 16, fontWeight: 'bold' },
-    playerAyahInfo: { color: 'rgba(255,255,255,0.5)', fontSize: 13 },
+    playerSurahName: { color: '#D4AF37', fontSize: rf(15), fontWeight: 'bold' },
+    playerAyahInfo: { color: 'rgba(255,255,255,0.5)', fontSize: rf(12) },
     globalPlayButton: {
-        width: 50, height: 50,
-        borderRadius: 25,
+        width: scale(44), height: scale(44),
+        borderRadius: scale(22),
         backgroundColor: '#D4AF37',
         justifyContent: 'center', alignItems: 'center'
     },
@@ -456,51 +457,51 @@ const styles = StyleSheet.create({
     modeButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 5,
+        padding: scale(5),
         backgroundColor: 'rgba(255,255,255,0.1)',
-        borderRadius: 15,
-        paddingHorizontal: 12
+        borderRadius: scale(15),
+        paddingHorizontal: scale(10)
     },
-    modeButtonText: { color: '#D4AF37', fontWeight: 'bold', marginLeft: 5, fontSize: 13 },
+    modeButtonText: { color: '#D4AF37', fontWeight: 'bold', marginLeft: scale(5), fontSize: rf(12) },
 
     // PAGE / MUSHAF VIEW
     pageWrapper: {
-        width: require('react-native').Dimensions.get('window').width,
+        width: SCREEN_DIMENSIONS.width,
         alignItems: 'center',
         justifyContent: 'center',
     },
     mushafScrollContent: {
-        paddingVertical: 10,
-        paddingHorizontal: 10,
+        paddingVertical: verticalScale(10),
+        paddingHorizontal: scale(10),
         alignItems: 'center',
-        paddingBottom: 120
+        paddingBottom: verticalScale(120)
     },
     mushafContainer: {
-        backgroundColor: '#FDF1DC', // Daha doğal kağıt rengi
-        padding: 24,
-        paddingTop: 40,
-        borderRadius: 8,
-        width: require('react-native').Dimensions.get('window').width - 20, // Kenarlardan boşluk
-        minHeight: require('react-native').Dimensions.get('window').height * 0.7,
+        backgroundColor: '#FDF1DC',
+        padding: scale(20),
+        paddingTop: verticalScale(35),
+        borderRadius: scale(8),
+        width: SCREEN_DIMENSIONS.width - scale(20),
+        minHeight: SCREEN_DIMENSIONS.height * 0.7,
         borderWidth: 1,
         borderColor: '#E0C097',
         alignItems: 'center',
-        shadowColor: "#000", shadowOffset: { width: 4, height: 2 }, shadowOpacity: 0.3, shadowRadius: 5, elevation: 8 // Kitap gölgesi
+        shadowColor: "#000", shadowOffset: { width: 4, height: 2 }, shadowOpacity: 0.3, shadowRadius: 5, elevation: 8
     },
     pageHeaderNumber: {
-        fontSize: 16,
+        fontSize: rf(14),
         color: '#8B7D6B',
-        marginBottom: 20,
+        marginBottom: verticalScale(16),
         fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif'
     },
     mushafTextBase: {
-        textAlign: 'justify', // İki yana yasla
-        lineHeight: 52,
+        textAlign: 'justify',
+        lineHeight: rf(46),
         writingDirection: 'rtl',
         width: '100%'
     },
     mushafAyahText: {
-        fontSize: 26,
+        fontSize: rf(24),
         color: '#2C3E50',
         fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif'
     },
@@ -509,26 +510,26 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(212, 175, 55, 0.15)'
     },
     endOfAyah: {
-        color: '#C0392B', // Ayet sonu işareti (süs)
-        fontSize: 22
+        color: '#C0392B',
+        fontSize: rf(20)
     },
 
     // TOGGLE BUTTON STYLES
     iconToggleContainer: {
         flexDirection: 'row',
         backgroundColor: 'rgba(255,255,255,0.1)',
-        borderRadius: 20,
-        padding: 4,
+        borderRadius: scale(20),
+        padding: scale(4),
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.1)'
     },
     iconButton: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
+        width: scale(34),
+        height: scale(34),
+        borderRadius: scale(17),
         justifyContent: 'center',
         alignItems: 'center',
-        marginLeft: 2
+        marginLeft: scale(2)
     },
     activeIconButton: {
         backgroundColor: '#D4AF37'

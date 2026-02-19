@@ -2,12 +2,12 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, Image, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
 import { BAYRAM_NAMAZI_CONTENT } from '../data/specialOccasionsData';
+import { rf, scale, verticalScale } from '../utils/responsive';
 
-const { width } = Dimensions.get('window');
 const ICON_PATTERN = require('../../assets/icons/ramadan.png');
 
 export default function BayramNamaziScreen() {
@@ -82,30 +82,28 @@ export default function BayramNamaziScreen() {
 
 const styles = StyleSheet.create({
     backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
-    bgPatternImage: { position: 'absolute', width: 400, height: 400, opacity: 0.03, tintColor: '#A0E6FF', resizeMode: 'contain' },
+    bgPatternImage: { position: 'absolute', width: scale(400), height: scale(400), opacity: 0.03, tintColor: '#A0E6FF', resizeMode: 'contain' },
 
-    // Header removed
+    scrollContent: { paddingHorizontal: scale(20), paddingBottom: verticalScale(20) },
 
-    scrollContent: { paddingHorizontal: 20, paddingBottom: 20 },
+    heroSection: { marginBottom: verticalScale(30), borderRadius: scale(20), overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(160, 230, 255, 0.3)' },
+    heroGradient: { padding: scale(30), alignItems: 'center' },
+    heroTitle: { fontSize: rf(22), fontWeight: 'bold', color: '#A0E6FF', textAlign: 'center', marginBottom: verticalScale(10), fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+    heroDescription: { fontSize: rf(16), color: 'rgba(255,255,255,0.9)', textAlign: 'center', lineHeight: rf(24) },
 
-    heroSection: { marginBottom: 30, borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(160, 230, 255, 0.3)' },
-    heroGradient: { padding: 30, alignItems: 'center' },
-    heroTitle: { fontSize: 22, fontWeight: 'bold', color: '#A0E6FF', textAlign: 'center', marginBottom: 10, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
-    heroDescription: { fontSize: 16, color: 'rgba(255,255,255,0.9)', textAlign: 'center', lineHeight: 24 },
+    sectionHeader: { fontSize: rf(18), color: '#A0E6FF', marginBottom: verticalScale(20), fontWeight: '600', marginLeft: scale(5) },
 
-    sectionHeader: { fontSize: 18, color: '#A0E6FF', marginBottom: 20, fontWeight: '600', marginLeft: 5 },
+    timelineContainer: { position: 'relative', paddingLeft: scale(10) },
+    timelineLine: { position: 'absolute', left: scale(24), top: verticalScale(20), bottom: verticalScale(50), width: scale(2), backgroundColor: 'rgba(160, 230, 255, 0.3)' },
 
-    timelineContainer: { position: 'relative', paddingLeft: 10 },
-    timelineLine: { position: 'absolute', left: 24, top: 20, bottom: 50, width: 2, backgroundColor: 'rgba(160, 230, 255, 0.3)' },
+    stepWrapper: { flexDirection: 'row', marginBottom: verticalScale(20) },
+    timelineDotContainer: { marginRight: scale(15), alignItems: 'center' },
+    timelineDot: { width: scale(30), height: scale(30), borderRadius: scale(15), backgroundColor: '#A0E6FF', justifyContent: 'center', alignItems: 'center', zIndex: 2 },
+    stepNumber: { color: '#000', fontWeight: 'bold', fontSize: rf(14) },
 
-    stepWrapper: { flexDirection: 'row', marginBottom: 20 },
-    timelineDotContainer: { marginRight: 15, alignItems: 'center' },
-    timelineDot: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#A0E6FF', justifyContent: 'center', alignItems: 'center', zIndex: 2 },
-    stepNumber: { color: '#000', fontWeight: 'bold', fontSize: 14 },
-
-    cardContainer: { flex: 1, borderRadius: 15, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
-    cardGradient: { padding: 20 },
-    cardTitle: { fontSize: 18, fontWeight: 'bold', color: '#A0E6FF', marginBottom: 8 },
-    divider: { height: 1, backgroundColor: 'rgba(160, 230, 255, 0.3)', marginBottom: 10 },
-    cardText: { fontSize: 15, color: 'rgba(255,255,255,0.8)', lineHeight: 22 },
+    cardContainer: { flex: 1, borderRadius: scale(15), overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+    cardGradient: { padding: scale(20) },
+    cardTitle: { fontSize: rf(18), fontWeight: 'bold', color: '#A0E6FF', marginBottom: verticalScale(8) },
+    divider: { height: 1, backgroundColor: 'rgba(160, 230, 255, 0.3)', marginBottom: verticalScale(10) },
+    cardText: { fontSize: rf(15), color: 'rgba(255,255,255,0.8)', lineHeight: rf(22) },
 });

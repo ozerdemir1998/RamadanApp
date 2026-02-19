@@ -7,6 +7,7 @@ import React from 'react';
 import { FlatList, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
+import { rf, scale, verticalScale } from '../utils/responsive';
 
 const ICON_PATTERN = require('../../assets/icons/pattern.png');
 
@@ -99,19 +100,19 @@ export default function NamazSureleriScreen() {
 
 const styles = StyleSheet.create({
     backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
-    bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.05 },
+    bgPatternImage: { position: 'absolute', width: scale(300), height: scale(300), opacity: 0.05 },
 
     listContent: {
-        padding: 20
+        padding: scale(20)
     },
     card: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         backgroundColor: 'rgba(255,255,255,0.05)',
-        marginBottom: 15,
-        padding: 15,
-        borderRadius: 12,
+        marginBottom: verticalScale(15),
+        padding: scale(15),
+        borderRadius: scale(12),
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.05)',
     },
@@ -124,20 +125,20 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-end',
-        minWidth: 80,
-        marginRight: 15,
+        minWidth: scale(80),
+        marginRight: scale(15),
     },
     arabicText: {
         color: '#D4AF37',
-        fontSize: 22,
+        fontSize: rf(22),
         fontWeight: 'bold',
         textAlign: 'right',
         fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-        marginRight: 10
+        marginRight: scale(10)
     },
     verticalSeparator: {
-        width: 2,
-        height: 30,
+        width: scale(2),
+        height: verticalScale(30),
         backgroundColor: '#D4AF37',
         opacity: 0.5,
         borderRadius: 1
@@ -147,13 +148,13 @@ const styles = StyleSheet.create({
     },
     title: {
         color: '#fff',
-        fontSize: 16,
+        fontSize: rf(16),
         fontWeight: 'bold',
         fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-        marginBottom: 4
+        marginBottom: verticalScale(4)
     },
     subtitle: {
         color: 'rgba(255,255,255,0.5)',
-        fontSize: 12
+        fontSize: rf(12)
     }
 });

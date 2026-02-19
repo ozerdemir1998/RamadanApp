@@ -2,13 +2,13 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { AppState, Dimensions, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { AppState, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
 import { DailyStory, fetchDailyContent } from '../services/contentService';
-import { rem, rf, scale, verticalScale } from '../utils/responsive';
+import { rem, rf, scale, SCREEN_DIMENSIONS, verticalScale } from '../utils/responsive';
 
-const { width } = Dimensions.get('window');
+const { width } = SCREEN_DIMENSIONS;
 const ICON_PATTERN = require('../../assets/icons/ramadan.png');
 
 // --- YEMEK KATEGORİLERİ ---
@@ -125,7 +125,7 @@ export default function LifeScreen() {
               onPress={() => openMedia('ayet')}
             >
               <LinearGradient
-                colors={['rgba(255, 255, 255, 0.03)', 'rgba(255, 255, 255, 0.03)']}
+                colors={['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.02)']}
                 style={styles.spiritualGradient}
                 start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
               >
@@ -143,11 +143,6 @@ export default function LifeScreen() {
                     <Ionicons name="chevron-forward" size={20} color="#D4AF37" />
                   </View>
                 </View>
-                {/* Altın Çerçeve Efekti */}
-                <View style={{
-                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                  borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.2)', borderRadius: 16
-                }} />
                 {/* Arka Plan Süsleme İkonu */}
                 <MaterialCommunityIcons name="book-open-variant" size={120} color="rgba(212, 175, 55, 0.05)" style={styles.bgIcon} />
               </LinearGradient>
@@ -162,23 +157,17 @@ export default function LifeScreen() {
                 onPress={() => openMedia('hadis')}
               >
                 <LinearGradient
-                  colors={['rgba(255, 255, 255, 0.03)', 'rgba(255, 255, 255, 0.03)']}
+                  colors={['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.02)']}
                   style={styles.spiritualGradient}
                   start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
                 >
                   <Image
                     source={require('../../assets/icons/book.png')}
-                    style={{ width: 26, height: 26, tintColor: '#D4AF37', marginBottom: 10, opacity: 0.9 }}
+                    style={{ width: scale(26), height: scale(26), tintColor: '#D4AF37', marginBottom: verticalScale(10), opacity: 0.9 }}
                     resizeMode="contain"
                   />
                   <Text style={styles.cardTitleSmall}>Günün Hadisi</Text>
                   <Text style={[styles.cardSubtitleSmall, { color: 'rgba(255,255,255,0.7)' }]}>Hz. Muhammed (S.A.V)</Text>
-
-                  {/* Altın Çerçeve Efekti (Opsiyonel, uyum için eklenebilir ama alan dar) */}
-                  <View style={{
-                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.08)', borderRadius: 16
-                  }} />
 
                   <MaterialCommunityIcons name="format-quote-close" size={60} color="rgba(212, 175, 55, 0.05)" style={styles.bgIconRight} />
                 </LinearGradient>
@@ -191,23 +180,17 @@ export default function LifeScreen() {
                 onPress={() => openMedia('dua')}
               >
                 <LinearGradient
-                  colors={['rgba(255, 255, 255, 0.03)', 'rgba(255, 255, 255, 0.03)']}
+                  colors={['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.02)']}
                   style={styles.spiritualGradient}
                   start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
                 >
                   <Image
                     source={require('../../assets/icons/pray.png')}
-                    style={{ width: 30, height: 30, tintColor: '#D4AF37', marginBottom: 10, opacity: 0.9 }}
+                    style={{ width: scale(30), height: scale(30), tintColor: '#D4AF37', marginBottom: verticalScale(10), opacity: 0.9 }}
                     resizeMode="contain"
                   />
                   <Text style={styles.cardTitleSmall}>Yemek Duası</Text>
                   <Text style={[styles.cardSubtitleSmall, { color: 'rgba(255,255,255,0.8)' }]}>İftar & Sahur</Text>
-
-                  {/* Altın Çerçeve Efekti */}
-                  <View style={{
-                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.08)', borderRadius: 16
-                  }} />
 
                   <MaterialCommunityIcons name="food-apple" size={60} color="rgba(212, 175, 55, 0.05)" style={styles.bgIconRight} />
                 </LinearGradient>
@@ -357,9 +340,9 @@ export default function LifeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { paddingBottom: 20 },
+  container: { paddingBottom: verticalScale(20) },
   backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
-  bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.1, tintColor: '#D4AF37', resizeMode: 'contain' },
+  bgPatternImage: { position: 'absolute', width: scale(300), height: scale(300), opacity: 0.1, tintColor: '#D4AF37', resizeMode: 'contain' },
 
   sectionContainer: { marginBottom: verticalScale(30), paddingHorizontal: scale(20) },
 
@@ -368,10 +351,6 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(12),
     borderRadius: scale(16),
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    elevation: 3,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4
   },
   spiritualGradient: {
     flex: 1,
@@ -420,12 +399,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between'
   },
   categoryCard: {
-    width: (width - scale(55)) / 2, // 2 sütun, ortadaki boşluk (15) ve paddingler (40) hesaplandı
-    aspectRatio: 1.1, // Kareye yakın
+    width: (width - scale(55)) / 2,
+    aspectRatio: 1.1,
     marginBottom: verticalScale(15),
     borderRadius: scale(16),
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
     overflow: 'hidden'
   },
   categoryGradient: {

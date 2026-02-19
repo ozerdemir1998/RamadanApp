@@ -5,11 +5,11 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
+import { rf, scale, verticalScale } from '../utils/responsive';
 
-const { width } = Dimensions.get('window');
 const blurhash =
     '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuwH';
 
@@ -155,65 +155,65 @@ const styles = StyleSheet.create({
     scrollContainer: { paddingBottom: 0 },
 
     loadingCenter: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0F2027' },
-    loadingText: { color: '#D4AF37', marginTop: 10 },
+    loadingText: { color: '#D4AF37', marginTop: verticalScale(10) },
 
     // GÖRSEL ALANI
-    imageHeader: { height: 380, width: '100%', position: 'relative' },
+    imageHeader: { height: verticalScale(380), width: '100%', position: 'relative' },
     foodImage: { width: '100%', height: '100%' },
 
     // Alt Gradient
     bottomGradient: {
         position: 'absolute', bottom: 0, left: 0, right: 0,
-        height: 180,
+        height: verticalScale(180),
         justifyContent: 'flex-end',
-        padding: 20,
-        paddingBottom: 45
+        padding: scale(20),
+        paddingBottom: verticalScale(45)
     },
     favButton: {
         position: 'absolute',
-        bottom: -22, // İçeriğin üstünde yüzmesi için
-        right: 30,
-        width: 35,
-        height: 35,
-        borderRadius: 22,
-        backgroundColor: 'transparent', // Light gray transparent
+        bottom: verticalScale(-22),
+        right: scale(30),
+        width: scale(35),
+        height: scale(35),
+        borderRadius: scale(22),
+        backgroundColor: 'transparent',
         justifyContent: 'center',
         alignItems: 'center',
         elevation: 10,
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 5 },
+        shadowOffset: { width: 0, height: verticalScale(5) },
         shadowOpacity: 0.5,
-        shadowRadius: 8,
+        shadowRadius: scale(8),
         borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.1)', // Subtler border
+        borderColor: 'rgba(255, 255, 255, 0.1)',
         zIndex: 50
     },
 
     // İÇERİK GÖVDESİ
     contentBody: {
-        marginTop: -40,
-        borderTopLeftRadius: 32,
-        borderTopRightRadius: 32,
-        padding: 25,
-        minHeight: 500,
-        paddingTop: 35
+        marginTop: verticalScale(-40),
+        borderTopLeftRadius: scale(32),
+        borderTopRightRadius: scale(32),
+        padding: scale(25),
+        minHeight: verticalScale(500),
+        paddingTop: verticalScale(35)
     },
 
-    sectionBox: { marginBottom: 35 },
+    sectionBox: { marginBottom: verticalScale(35) },
     sectionHeaderRow: {
-        flexDirection: 'row', alignItems: 'center', marginBottom: 15, gap: 10,
-        borderBottomWidth: 1, borderBottomColor: 'rgba(212, 175, 55, 0.2)', paddingBottom: 10
+        flexDirection: 'row', alignItems: 'center', marginBottom: verticalScale(15), gap: scale(10),
+        borderBottomWidth: 1, borderBottomColor: 'rgba(212, 175, 55, 0.2)', paddingBottom: verticalScale(10)
     },
-    sectionHeader: { fontSize: 20, fontWeight: 'bold', color: '#D4AF37', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+    sectionHeader: { fontSize: rf(20), fontWeight: 'bold', color: '#D4AF37', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
 
     detailText: {
-        fontSize: 16, color: 'rgba(255,255,255,0.8)', lineHeight: 28,
+        fontSize: rf(16), color: 'rgba(255,255,255,0.8)', lineHeight: rf(28),
         fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif'
     },
     instructionsContainer: {
         backgroundColor: 'rgba(255,255,255,0.03)',
-        padding: 15,
-        borderRadius: 16,
+        padding: scale(15),
+        borderRadius: scale(16),
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.05)'
     },
@@ -222,28 +222,28 @@ const styles = StyleSheet.create({
     ingredientsPillsContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 10
+        gap: scale(10)
     },
     ingredientPill: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: 'rgba(212, 175, 55, 0.15)',
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 20,
+        paddingVertical: verticalScale(8),
+        paddingHorizontal: scale(12),
+        borderRadius: scale(20),
         borderWidth: 1,
         borderColor: 'rgba(212, 175, 55, 0.3)'
     },
     pillDot: {
-        width: 6,
-        height: 6,
-        borderRadius: 3,
+        width: scale(6),
+        height: scale(6),
+        borderRadius: scale(3),
         backgroundColor: '#D4AF37',
-        marginRight: 8
+        marginRight: scale(8)
     },
     ingredientPillText: {
         color: '#fff',
-        fontSize: 14,
+        fontSize: rf(14),
         fontWeight: '500'
     }
 });

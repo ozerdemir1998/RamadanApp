@@ -5,10 +5,11 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, Image, Modal, Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { Image, Modal, Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { SCREEN_DIMENSIONS, rf, scale, verticalScale } from '../utils/responsive';
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = SCREEN_DIMENSIONS;
 
 // --- İKON ---
 const ICON_PATTERN = require('../../assets/icons/adhan.png');
@@ -182,6 +183,8 @@ export default function AlarmsScreen() {
                         Vakitler için bildirim ayarlarını buradan yönetebilirsiniz.
                     </Text>
 
+
+
                     <View style={{ height: 100 }} />
                 </ScrollView>
             </SafeAreaView>
@@ -234,59 +237,48 @@ export default function AlarmsScreen() {
 const styles = StyleSheet.create({
     // ARKAPLAN
     backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
-    bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.05, tintColor: '#D4AF37', resizeMode: 'contain' },
+    bgPatternImage: { position: 'absolute', width: scale(300), height: scale(300), opacity: 0.05, tintColor: '#D4AF37', resizeMode: 'contain' },
 
     // HEADER
-    content: { padding: 20 },
-    // Actually ScreenHeader is inside ScrollView here? 
-    // In current code: ScrollView contains ScreenHeader. 
-    // ScreenHeader width is 100%. 
-    // content style has padding: 20. 
-    // If I put ScreenHeader inside padding 20, it will be indented.
-    // ScreenHeader should be full width.
-    sectionDesc: { color: 'rgba(255,255,255,0.5)', fontSize: 13, marginBottom: 20, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', paddingHorizontal: 20, marginTop: 10 },
+    content: { padding: scale(20) },
+    sectionDesc: { color: 'rgba(255,255,255,0.5)', fontSize: rf(13), marginBottom: verticalScale(20), fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', paddingHorizontal: scale(20), marginTop: verticalScale(10) },
 
     // KART
     alarmCard: {
-        marginBottom: 12,
-        borderRadius: 16,
+        marginBottom: verticalScale(12),
+        borderRadius: scale(16),
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: 'rgba(212, 175, 55, 0.15)',
+        borderColor: 'rgba(255, 255, 255, 0.08)',
     },
     activeAlarmCard: {
-        borderColor: '#D4AF37', // Altın Sarısı
+        borderColor: '#D4AF37',
         borderWidth: 1.5,
-        shadowColor: '#D4AF37',
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.6,
-        shadowRadius: 10,
-        elevation: 5, // Android için parlama efekti
     },
-    cardGradient: { padding: 16 },
+    cardGradient: { padding: scale(16) },
 
     cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     titleSection: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-    rightSection: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    rightSection: { flexDirection: 'row', alignItems: 'center', gap: scale(10) },
 
     iconBox: {
-        width: 44, height: 44, borderRadius: 12,
+        width: scale(44), height: scale(44), borderRadius: scale(12),
         backgroundColor: 'rgba(255,255,255,0.05)',
-        justifyContent: 'center', alignItems: 'center', marginRight: 15
+        justifyContent: 'center', alignItems: 'center', marginRight: scale(15)
     },
     activeIconBox: { backgroundColor: '#D4AF37' },
 
-    cardTitle: { fontSize: 18, color: 'rgba(255,255,255,0.5)', fontWeight: '600' },
+    cardTitle: { fontSize: rf(18), color: 'rgba(255,255,255,0.5)', fontWeight: '600' },
     activeText: { color: '#fff' },
-    cardSub: { fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 2 },
+    cardSub: { fontSize: rf(12), color: 'rgba(255,255,255,0.3)', marginTop: verticalScale(2) },
 
-    activeInfoText: { fontSize: 13, color: '#D4AF37', fontWeight: 'bold', marginTop: 2 },
+    activeInfoText: { fontSize: rf(13), color: '#D4AF37', fontWeight: 'bold', marginTop: verticalScale(2) },
 
     editButton: {
-        padding: 8,
+        padding: scale(8),
         backgroundColor: 'rgba(212, 175, 55, 0.1)',
-        borderRadius: 8,
-        marginRight: 5
+        borderRadius: scale(8),
+        marginRight: scale(5)
     },
 
     // MODAL STİLLERİ
@@ -295,29 +287,29 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.7)',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 20
+        padding: scale(20)
     },
     modalContent: {
         width: '100%',
         backgroundColor: '#203A43',
-        borderRadius: 20,
-        padding: 20,
+        borderRadius: scale(20),
+        padding: scale(20),
         borderWidth: 1,
         borderColor: 'rgba(212, 175, 55, 0.3)',
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 10 },
+        shadowOffset: { width: 0, height: verticalScale(10) },
         shadowOpacity: 0.5,
-        shadowRadius: 20,
+        shadowRadius: scale(20),
         elevation: 10
     },
     modalHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 20
+        marginBottom: verticalScale(20)
     },
     modalTitle: {
-        fontSize: 18,
+        fontSize: rf(18),
         color: '#D4AF37',
         fontWeight: 'bold',
         fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif'
@@ -325,21 +317,21 @@ const styles = StyleSheet.create({
     modalOptionsGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 10,
+        gap: scale(10),
         justifyContent: 'space-between'
     },
     modalOption: {
-        width: '48%', // İki kolonlu yapı
+        width: '48%',
         backgroundColor: 'rgba(255,255,255,0.05)',
-        paddingVertical: 15,
-        paddingHorizontal: 15,
-        borderRadius: 12,
+        paddingVertical: verticalScale(15),
+        paddingHorizontal: scale(15),
+        borderRadius: scale(12),
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.1)',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 10
+        marginBottom: verticalScale(10)
     },
     modalOptionActive: {
         backgroundColor: '#D4AF37',
@@ -347,11 +339,11 @@ const styles = StyleSheet.create({
     },
     modalOptionText: {
         color: 'rgba(255,255,255,0.7)',
-        fontSize: 14,
+        fontSize: rf(14),
         fontWeight: '600'
     },
     modalOptionTextActive: {
         color: '#0F2027',
         fontWeight: 'bold'
-    }
+    },
 });

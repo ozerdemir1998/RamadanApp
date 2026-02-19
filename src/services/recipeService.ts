@@ -1,5 +1,6 @@
 import { collection, doc, getDoc, getDocs, limit, query, where } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
+import { CACHE_DURATIONS, getFromCache, setCache } from './cacheService';
 
 export interface Recipe {
   id: string;
@@ -20,12 +21,16 @@ const CATEGORY_MAP: { [key: string]: string[] } = {
   'salata': ['Salata'],
   'karbonhidrat': ['Makarna', 'Pilav', 'Hamur İşi', 'Börek'],
   'tatlilar': ['Tatlılar'],
-  'sahurluk': ['Kahvaltılık', 'Sahur'] // Veride yoksa boş döner
+  'sahurluk': ['Kahvaltılık', 'Sahur']
 };
 
-// Kategorideki tarifleri çek
+// Kategorideki tarifleri çek (1 saat cache)
 export const fetchRecipesByCategory = async (categorySlug: string): Promise<Recipe[]> => {
   try {
+    const cacheKey = `recipes_${categorySlug}`;
+    const cached = await getFromCache<Recipe[]>(cacheKey, CACHE_DURATIONS.ONE_HOUR);
+    if (cached) return cached;
+
     const targetCategories = CATEGORY_MAP[categorySlug];
 
     if (!targetCategories) {
@@ -33,7 +38,6 @@ export const fetchRecipesByCategory = async (categorySlug: string): Promise<Reci
       return [];
     }
 
-    // 'in' operatörü ile birden fazla kategori çekebiliriz (Sebze + Salata gibi)
     const q = query(
       collection(db, 'recipes'),
       where('category', 'in', targetCategories),
@@ -42,11 +46,13 @@ export const fetchRecipesByCategory = async (categorySlug: string): Promise<Reci
 
     const snapshot = await getDocs(q);
 
-    // Sadece DB verisini döndür, API çağrısı yapma
-    return snapshot.docs.map(doc => ({
+    const recipes = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     } as Recipe));
+
+    await setCache(cacheKey, recipes);
+    return recipes;
 
   } catch (error) {
     console.error("Tarif çekme hatası:", error);
@@ -54,18 +60,24 @@ export const fetchRecipesByCategory = async (categorySlug: string): Promise<Reci
   }
 };
 
-// Tekil tarif detayı çek
+// Tekil tarif detayı çek (1 saat cache)
 export const fetchRecipeDetail = async (recipeId: string): Promise<Recipe | null> => {
   try {
+    const cacheKey = `recipe_detail_${recipeId}`;
+    const cached = await getFromCache<Recipe>(cacheKey, CACHE_DURATIONS.ONE_HOUR);
+    if (cached) return cached;
+
     const docRef = doc(db, 'recipes', recipeId);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      // Sadece DB verisini döndür
-      return {
+      const recipe = {
         id: docSnap.id,
         ...docSnap.data()
       } as Recipe;
+
+      await setCache(cacheKey, recipe);
+      return recipe;
     } else {
       return null;
     }
@@ -74,3 +86,4 @@ export const fetchRecipeDetail = async (recipeId: string): Promise<Recipe | null
     return null;
   }
 };
+

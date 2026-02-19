@@ -6,6 +6,7 @@ import { ActivityIndicator, FlatList, Platform, StyleSheet, Text, TextInput, Tou
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
 import { Surah, quranService } from '../services/quranService';
+import { rf, scale, verticalScale } from '../utils/responsive';
 
 export default function QuranListScreen() {
     const router = useRouter();
@@ -131,67 +132,64 @@ export default function QuranListScreen() {
 
 const styles = StyleSheet.create({
     header: {
-        paddingHorizontal: 20,
-        paddingVertical: 20,
+        paddingHorizontal: scale(20),
+        paddingVertical: verticalScale(20),
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between'
     },
-    headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#D4AF37', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
-    headerSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 2 },
-
-
+    headerTitle: { fontSize: rf(20), fontWeight: 'bold', color: '#D4AF37', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+    headerSubtitle: { fontSize: rf(12), color: 'rgba(255,255,255,0.6)', marginTop: verticalScale(2) },
 
     searchContainer: {
-        marginHorizontal: 20,
-        marginBottom: 20,
+        marginHorizontal: scale(20),
+        marginBottom: verticalScale(18),
         backgroundColor: 'rgba(255,255,255,0.05)',
-        borderRadius: 12,
+        borderRadius: scale(12),
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 15,
+        paddingHorizontal: scale(15),
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.1)'
     },
-    searchIcon: { marginRight: 10 },
-    searchInput: { flex: 1, height: 45, color: '#fff', fontSize: 16 },
+    searchIcon: { marginRight: scale(10) },
+    searchInput: { flex: 1, height: verticalScale(42), color: '#fff', fontSize: rf(15) },
 
-    listContent: { paddingBottom: 100 },
+    listContent: { paddingBottom: verticalScale(100) },
     loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    loadingText: { color: 'rgba(255,255,255,0.5)', marginTop: 10 },
+    loadingText: { color: 'rgba(255,255,255,0.5)', marginTop: verticalScale(10), fontSize: rf(13) },
 
-    // REDESIGNED CARD STYLES
     card: {
         backgroundColor: 'rgba(255,255,255,0.03)',
-        borderRadius: 12,
-        marginBottom: 10,
-        marginHorizontal: 20,
+        borderRadius: scale(12),
+        marginBottom: verticalScale(8),
+        marginHorizontal: scale(20),
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.05)'
     },
     cardContent: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 15
+        padding: scale(12)
     },
     arabicBox: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-end',
-        minWidth: 80, // Ensure minimum width for alignment
-        marginRight: 15,
+        minWidth: scale(70),
+        marginRight: scale(12),
     },
     arabicText: {
         color: '#D4AF37',
-        fontSize: 22, // Slightly smaller than Esma text since Surah names can be long
+        fontSize: rf(20),
         fontWeight: 'bold',
         textAlign: 'right',
         fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-        marginRight: 10
+        marginRight: scale(10)
     },
     verticalSeparator: {
         width: 2,
-        height: 30,
+        height: verticalScale(28),
         backgroundColor: '#D4AF37',
         opacity: 0.5,
         borderRadius: 1
@@ -202,13 +200,13 @@ const styles = StyleSheet.create({
     },
     englishName: {
         color: '#fff',
-        fontSize: 16,
+        fontSize: rf(15),
         fontWeight: 'bold',
         fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif'
     },
     versesCount: {
         color: 'rgba(255,255,255,0.5)',
-        fontSize: 13,
-        marginTop: 2
+        fontSize: rf(12),
+        marginTop: verticalScale(2)
     }
 });

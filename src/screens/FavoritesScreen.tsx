@@ -4,15 +4,15 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, FlatList, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
 import { useFavorites } from '../context/FavoritesContext';
+import { rf, scale, SCREEN_DIMENSIONS, verticalScale } from '../utils/responsive';
 
-const { width } = Dimensions.get('window');
 const COLUMN_COUNT = 2;
-const SPACING = 15;
-const CARD_WIDTH = (width - (SPACING * (COLUMN_COUNT + 1))) / COLUMN_COUNT;
+const SPACING = scale(15);
+const CARD_WIDTH = (SCREEN_DIMENSIONS.width - (SPACING * (COLUMN_COUNT + 1))) / COLUMN_COUNT;
 const ICON_PATTERN = require('../../assets/icons/pattern.png');
 const blurhash = '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuwH';
 
@@ -104,12 +104,6 @@ export default function FavoritesScreen() {
                         </View>
                         <Text style={styles.emptyTitle}>Listeniz Boş</Text>
                         <Text style={styles.emptyText}>Henüz favori tarif eklemediniz.</Text>
-                        <TouchableOpacity
-                            style={styles.exploreBtn}
-                            onPress={() => router.back()}
-                        >
-                            <Text style={styles.exploreBtnText}>Tarifleri Keşfet</Text>
-                        </TouchableOpacity>
                     </View>
                 ) : (
                     <FlatList
@@ -128,52 +122,52 @@ export default function FavoritesScreen() {
 
 const styles = StyleSheet.create({
     backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
-    bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.05 },
+    bgPatternImage: { position: 'absolute', width: scale(300), height: scale(300), opacity: 0.05 },
 
-    listContent: { paddingVertical: 20 },
+    listContent: { paddingVertical: verticalScale(20) },
 
     // EMPTY STATE
-    emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 },
+    emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: scale(40) },
     emptyIconContainer: {
-        width: 120, height: 120, borderRadius: 60,
+        width: scale(120), height: scale(120), borderRadius: scale(60),
         backgroundColor: 'rgba(255,255,255,0.05)',
-        justifyContent: 'center', alignItems: 'center', marginBottom: 20
+        justifyContent: 'center', alignItems: 'center', marginBottom: verticalScale(20)
     },
-    emptyTitle: { color: '#fff', fontSize: 24, fontWeight: 'bold', marginBottom: 10, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
-    emptyText: { color: 'rgba(255,255,255,0.5)', textAlign: 'center', fontSize: 16, marginBottom: 30 },
+    emptyTitle: { color: '#fff', fontSize: rf(24), fontWeight: 'bold', marginBottom: verticalScale(10), fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+    emptyText: { color: 'rgba(255,255,255,0.5)', textAlign: 'center', fontSize: rf(16), marginBottom: verticalScale(30) },
     exploreBtn: {
-        backgroundColor: '#D4AF37', paddingHorizontal: 30, paddingVertical: 15, borderRadius: 30,
-        shadowColor: '#D4AF37', shadowOpacity: 0.3, shadowRadius: 10
+        backgroundColor: '#D4AF37', paddingHorizontal: scale(30), paddingVertical: verticalScale(15), borderRadius: scale(30),
+        shadowColor: '#D4AF37', shadowOpacity: 0.3, shadowRadius: scale(10)
     },
-    exploreBtnText: { color: '#0F2027', fontWeight: 'bold', fontSize: 16 },
+    exploreBtnText: { color: '#0F2027', fontWeight: 'bold', fontSize: rf(16) },
 
-    // CARD STYLES (Copied from RecipesScreen for consistency)
+    // CARD STYLES
     cardContainer: {
         width: CARD_WIDTH,
         backgroundColor: '#1E2A32',
-        borderRadius: 16,
+        borderRadius: scale(16),
         overflow: 'hidden',
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.05)',
         elevation: 6,
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: { width: 0, height: verticalScale(4) },
         shadowOpacity: 0.3,
-        shadowRadius: 5,
+        shadowRadius: scale(5),
     },
-    imageWrapper: { height: 140, width: '100%', position: 'relative' },
+    imageWrapper: { height: verticalScale(140), width: '100%', position: 'relative' },
     cardImage: { width: '100%', height: '100%' },
     likeBadge: {
-        position: 'absolute', top: 8, right: 8,
-        backgroundColor: 'rgba(0,0,0,0.6)', padding: 6, borderRadius: 50,
+        position: 'absolute', top: verticalScale(8), right: scale(8),
+        backgroundColor: 'rgba(0,0,0,0.6)', padding: scale(6), borderRadius: scale(50),
     },
-    cardContent: { padding: 12 },
+    cardContent: { padding: scale(12) },
     cardTitle: {
-        color: '#fff', fontSize: 15, fontWeight: 'bold',
+        color: '#fff', fontSize: rf(15), fontWeight: 'bold',
         fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-        marginBottom: 8, height: 40
+        marginBottom: verticalScale(8), height: verticalScale(40)
     },
     cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    timeTag: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    timeText: { color: '#ccc', fontSize: 12 }
+    timeTag: { flexDirection: 'row', alignItems: 'center', gap: scale(4) },
+    timeText: { color: '#ccc', fontSize: rf(12) }
 });

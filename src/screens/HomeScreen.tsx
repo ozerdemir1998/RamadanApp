@@ -4,16 +4,13 @@ import { getPrayerTimesByCity, getPrayerTimesByCoordinates, PrayerTimes } from '
 import { getEsmaulHusna } from '@/services/esmaService';
 import { registerForPushNotificationsAsync, schedulePrayerNotifications } from '@/services/notificationService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Dimensions, Easing, Image, Platform, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Animated, Easing, Image, Platform, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-
-const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
-
-// Küçük ekran kontrolü (örn. iPhone SE veya eski Androidler)
-const IS_SMALL_DEVICE = SCREEN_HEIGHT < 700;
+import { rf, scale, verticalScale } from '../utils/responsive';
 
 // --- İKONLARI PROJEDEN ÇEKME ---
 const ICON_PATTERN = require('../../assets/icons/pattern.png');
@@ -37,7 +34,6 @@ const QUOTE_LIST = [
   { text: "İncinsen de incitme.", author: "Hacı Bektaş-ı Veli" }
 ];
 
-// --- ANİMASYONLU SATIR BİLEŞENİ ---
 // --- ANİMASYONLU SATIR BİLEŞENİ ---
 const AnimatedInfoRow = ({
   iconSource,
@@ -64,8 +60,6 @@ const AnimatedInfoRow = ({
 
   // Görünürlük Kontrolü
   useEffect(() => {
-    // "Uygulama ilk açıldığında" dediği için hemen başlatıyoruz, 
-    // ama yine de layout hesaplandıktan sonra (elementY > 0) tetiklenmesi sağlıklı.
     if (!hasAnimated && elementY > 0) {
       triggerAnimation();
     }
@@ -74,14 +68,12 @@ const AnimatedInfoRow = ({
   const triggerAnimation = () => {
     setHasAnimated(true);
     Animated.sequence([
-      // 1. Çizgi Açılacak (0 -> 1)
       Animated.timing(lineScale, {
         toValue: 1,
         duration: 700,
         useNativeDriver: true,
         easing: Easing.out(Easing.cubic)
       }),
-      // 2. İçerikler Çıkacak (Paralel)
       Animated.parallel([
         Animated.timing(topSlideAndOpacity, {
           toValue: 1,
@@ -99,14 +91,11 @@ const AnimatedInfoRow = ({
     ]).start();
   };
 
-  // Interpolasyonlar
-  // Üst kısım: Aşağıdan yukarıya çıkacak (Maskenin altından) 
   const topTranslateY = topSlideAndOpacity.interpolate({
     inputRange: [0, 1],
     outputRange: [60, 0]
   });
 
-  // Alt kısım: Yukarıdan aşağıya inecek (Maskenin üstünden)
   const bottomTranslateY = bottomSlideAndOpacity.interpolate({
     inputRange: [0, 1],
     outputRange: [-60, 0]
@@ -121,7 +110,7 @@ const AnimatedInfoRow = ({
       }}
     >
       {/* ÜST İÇERİK MASKESİ */}
-      <View style={{ overflow: 'hidden', alignItems: 'center', width: '100%', paddingBottom: 5 }}>
+      <View style={{ overflow: 'hidden', alignItems: 'center', width: '100%', paddingBottom: verticalScale(5) }}>
         <Animated.View style={{
           opacity: topSlideAndOpacity,
           transform: [{ translateY: topTranslateY }],
@@ -131,10 +120,10 @@ const AnimatedInfoRow = ({
           <Image
             source={iconSource}
             style={{
-              width: isQuote ? 70 : 90,
-              height: isQuote ? 70 : 90,
+              width: isQuote ? scale(50) : scale(60),
+              height: isQuote ? scale(50) : scale(60),
               tintColor: '#D4AF37',
-              marginBottom: 10
+              marginBottom: verticalScale(8)
             }}
             resizeMode="contain"
           />
@@ -146,14 +135,14 @@ const AnimatedInfoRow = ({
       <Animated.View style={[styles.horizontalDivider, { transform: [{ scaleX: lineScale }] }]} />
 
       {/* ALT İÇERİK MASKESİ */}
-      <View style={{ overflow: 'hidden', alignItems: 'center', width: '100%', paddingTop: 5 }}>
+      <View style={{ overflow: 'hidden', alignItems: 'center', width: '100%', paddingTop: verticalScale(5) }}>
         <Animated.View style={{
           opacity: bottomSlideAndOpacity,
           transform: [{ translateY: bottomTranslateY }],
           alignItems: 'center',
           width: '100%'
         }}>
-          <Text style={[styles.mainText, isQuote && { fontSize: IS_SMALL_DEVICE ? 20 : 24, fontStyle: 'italic', paddingHorizontal: 10 }]}>
+          <Text style={[styles.mainText, isQuote && { fontSize: rf(20), fontStyle: 'italic', paddingHorizontal: scale(10) }]}>
             {isQuote ? `"${mainText}"` : mainText}
           </Text>
 
@@ -179,25 +168,67 @@ export default function HomeScreen() {
   const { timeLeft, nextPrayerName, isIftar } = useNextPrayer(times);
   const todayDate = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 
-  // GÜVENLİ ALANLARI AL (EKLENDİ)
+  // GÜVENLİ ALANLARI AL
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
     registerForPushNotificationsAsync();
     getUserLocationAndFetchTimes();
-    loadRandomEsma();
-    setDailyQuote(QUOTE_LIST[Math.floor(Math.random() * QUOTE_LIST.length)]);
+    loadDailyEsma();
+    loadDailyQuote();
   }, []);
 
-  const loadRandomEsma = async () => {
+  // Günün tarihini anahtar olarak kullan
+  const getTodayKey = () => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  };
+
+  const loadDailyEsma = async () => {
     try {
+      const todayKey = getTodayKey();
+      const cacheKey = `@daily_esma_${todayKey}`;
+
+      // Önce cache'e bak
+      const cached = await AsyncStorage.getItem(cacheKey);
+      if (cached) {
+        setDailyEsma(JSON.parse(cached));
+        return;
+      }
+
+      // Cache yoksa Firebase'den çek ve günlük seçim yap
       const allEsmas = await getEsmaulHusna();
       if (allEsmas && allEsmas.length > 0) {
-        const randomEsma = allEsmas[Math.floor(Math.random() * allEsmas.length)];
-        setDailyEsma(randomEsma);
+        // Tarihe göre deterministik seçim
+        const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+        const selectedEsma = allEsmas[dayOfYear % allEsmas.length];
+        setDailyEsma(selectedEsma);
+        await AsyncStorage.setItem(cacheKey, JSON.stringify(selectedEsma));
       }
     } catch (e) {
-      console.log("Error loading random esma", e);
+      console.log("Error loading daily esma", e);
+    }
+  };
+
+  const loadDailyQuote = async () => {
+    try {
+      const todayKey = getTodayKey();
+      const cacheKey = `@daily_quote_${todayKey}`;
+
+      // Önce cache'e bak
+      const cached = await AsyncStorage.getItem(cacheKey);
+      if (cached) {
+        setDailyQuote(JSON.parse(cached));
+        return;
+      }
+
+      // Tarihe göre deterministik seçim
+      const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+      const selectedQuote = QUOTE_LIST[dayOfYear % QUOTE_LIST.length];
+      setDailyQuote(selectedQuote);
+      await AsyncStorage.setItem(cacheKey, JSON.stringify(selectedQuote));
+    } catch (e) {
+      console.log("Error loading daily quote", e);
     }
   };
 
@@ -234,8 +265,6 @@ export default function HomeScreen() {
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-    loadRandomEsma();
-    setDailyQuote(QUOTE_LIST[Math.floor(Math.random() * QUOTE_LIST.length)]);
     getUserLocationAndFetchTimes().then(() => setRefreshing(false));
   }, []);
 
@@ -291,15 +320,12 @@ export default function HomeScreen() {
         >
           {/* HEADER */}
           <View style={styles.headerContainer}>
-
-
-
             <View style={styles.titleRow}>
               <MaterialCommunityIcons
                 name={getPrayerIcon(currentPrayerTitle) as any}
-                size={IS_SMALL_DEVICE ? 56 : 72}
+                size={rf(40)}
                 color="#D4AF37"
-                style={{ marginRight: 20, marginTop: 5 }}
+                style={{ marginRight: scale(12), marginTop: verticalScale(3) }}
               />
               <Text style={styles.headerTitle}>{currentPrayerTitle}</Text>
             </View>
@@ -314,7 +340,7 @@ export default function HomeScreen() {
             </Text>
           </View>
 
-          <View style={{ height: 50 }} />
+          <View style={{ height: verticalScale(30) }} />
 
           {/* --- ANİMASYONLU GÜNÜN ESMASI --- */}
           <AnimatedInfoRow
@@ -325,7 +351,7 @@ export default function HomeScreen() {
             scrollY={scrollY}
           />
 
-          <View style={{ height: 40 }} />
+          <View style={{ height: verticalScale(25) }} />
 
           {/* VAKİT LİSTESİ */}
           {times && (
@@ -339,7 +365,7 @@ export default function HomeScreen() {
             </View>
           )}
 
-          <View style={{ height: 40 }} />
+          <View style={{ height: verticalScale(25) }} />
 
           {/* --- ANİMASYONLU GÜNÜN SÖZÜ --- */}
           <AnimatedInfoRow
@@ -367,7 +393,7 @@ const PrayerItem = ({ time, name, active, icon }: { time: string, name: string, 
     <Text style={[styles.prayerName, active && styles.activeText]}>{name}</Text>
     <MaterialCommunityIcons
       name={icon as any}
-      size={active ? 34 : 28}
+      size={active ? rf(24) : rf(20)}
       color={active ? "#FFD700" : "rgba(255,255,255,0.3)"}
       style={active ? styles.glowingIcon : {}}
     />
@@ -376,63 +402,61 @@ const PrayerItem = ({ time, name, active, icon }: { time: string, name: string, 
 
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0F2027' },
-  container: { padding: 20, alignItems: 'center' },
+  container: { padding: scale(20), alignItems: 'center' },
 
   backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
-  bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.07, tintColor: '#D4AF37', resizeMode: 'contain' },
+  bgPatternImage: { position: 'absolute', width: scale(300), height: scale(300), opacity: 0.07, tintColor: '#D4AF37', resizeMode: 'contain' },
 
   // HEADER
-  headerContainer: { alignItems: 'center', marginTop: IS_SMALL_DEVICE ? 15 : 30, marginBottom: IS_SMALL_DEVICE ? 30 : 50, position: 'relative' },
+  headerContainer: { alignItems: 'center', marginTop: verticalScale(10), marginBottom: verticalScale(15), position: 'relative' },
 
-  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
-  headerTitle: { fontSize: IS_SMALL_DEVICE ? 56 : 72, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', color: '#D4AF37', letterSpacing: 1, lineHeight: IS_SMALL_DEVICE ? 60 : 80, textAlign: 'center' },
-  headerSubtitle: { color: 'rgba(212, 175, 55, 0.7)', fontSize: 18, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', letterSpacing: 1, marginTop: 5 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: verticalScale(6) },
+  headerTitle: { fontSize: rf(42), fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', color: '#D4AF37', letterSpacing: 1, textAlign: 'center' },
+  headerSubtitle: { color: 'rgba(212, 175, 55, 0.7)', fontSize: rf(14), fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', letterSpacing: 1, marginTop: verticalScale(3) },
 
-  // SAYAÇ - DAHA KLASİK VE UZUNLAMASINA TİP
-  countdownContainer: { alignItems: 'center', marginBottom: 10, marginTop: 10 },
+  // SAYAÇ - Normal font, scaleY kaldırıldı
+  countdownContainer: { alignItems: 'center', marginBottom: verticalScale(5), marginTop: verticalScale(5) },
   countdownText: {
-    fontSize: IS_SMALL_DEVICE ? 64 : 82,
-    fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif', // En klasik font
+    fontSize: rf(48),
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
     fontWeight: 'bold',
     color: '#D4AF37',
     textShadowColor: 'rgba(212, 175, 55, 0.4)',
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 25,
-    letterSpacing: 6,
+    textShadowRadius: 20,
+    letterSpacing: scale(4),
     fontVariant: ['tabular-nums'],
     textAlign: 'center',
-    width: '100%',
-    transform: [{ scaleY: 1.3 }], // Uzun görünüm
-    paddingVertical: 10
+    // scaleY kaldırıldı - normal font
   },
-  nextPrayerInfo: { color: 'rgba(255,255,255,0.6)', fontSize: 17, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', marginTop: 5, letterSpacing: 1.5 },
+  nextPrayerInfo: { color: 'rgba(255,255,255,0.6)', fontSize: rf(14), fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', marginTop: verticalScale(5), letterSpacing: 1.5 },
 
-  // ANİMASYONLU KART STİLLERİ (YENİ - MERKEZİ)
+  // ANİMASYONLU KART STİLLERİ
   infoCard: {
     width: '100%',
     alignItems: 'center',
-    paddingVertical: 15,
-    paddingHorizontal: 20
+    paddingVertical: verticalScale(12),
+    paddingHorizontal: scale(20)
   },
 
-  horizontalDivider: { width: 60, height: 2, backgroundColor: '#D4AF37', opacity: 0.5, marginVertical: 12, borderRadius: 1 },
+  horizontalDivider: { width: scale(60), height: 2, backgroundColor: '#D4AF37', opacity: 0.5, marginVertical: verticalScale(10), borderRadius: 1 },
 
-  label: { color: '#D4AF37', fontSize: 15, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', textTransform: 'uppercase', letterSpacing: 2.5, marginBottom: 8, opacity: 0.9, textAlign: 'center' },
-  mainText: { color: '#fff', fontSize: IS_SMALL_DEVICE ? 26 : 30, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', marginBottom: 8, textAlign: 'center', lineHeight: 36 },
-  subText: { color: 'rgba(255,255,255,0.7)', fontSize: 16, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', fontStyle: 'italic', lineHeight: 24, textAlign: 'center' },
+  label: { color: '#D4AF37', fontSize: rf(13), fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', textTransform: 'uppercase', letterSpacing: 2.5, marginBottom: verticalScale(6), opacity: 0.9, textAlign: 'center' },
+  mainText: { color: '#fff', fontSize: rf(24), fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', marginBottom: verticalScale(6), textAlign: 'center', lineHeight: rf(32) },
+  subText: { color: 'rgba(255,255,255,0.7)', fontSize: rf(14), fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', fontStyle: 'italic', lineHeight: rf(22), textAlign: 'center' },
 
   // LİSTE
-  prayerListContainer: { width: '100%', marginTop: 25, marginBottom: 25, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)' },
-  prayerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: IS_SMALL_DEVICE ? 18 : 22, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' },
-  activeText: { color: '#D4AF37', fontWeight: 'bold', fontSize: 24 },
-  prayerTime: { color: '#fff', fontSize: 22, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', width: 100 },
-  prayerName: { color: 'rgba(255,255,255,0.8)', fontSize: 22, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', flex: 1, textAlign: 'center' },
+  prayerListContainer: { width: '100%', marginTop: verticalScale(15), marginBottom: verticalScale(15), borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)' },
+  prayerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: verticalScale(14), paddingHorizontal: scale(20), borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' },
+  activeText: { color: '#D4AF37', fontWeight: 'bold', fontSize: rf(18) },
+  prayerTime: { color: '#fff', fontSize: rf(16), fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', width: scale(80) },
+  prayerName: { color: 'rgba(255,255,255,0.8)', fontSize: rf(16), fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', flex: 1, textAlign: 'center' },
 
-  // İKON BLUR YUMUŞATILDI
+  // İKON BLUR
   glowingIcon: {
     textShadowColor: 'rgba(212, 175, 55, 0.5)',
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20, // Yumuşatıldı
+    textShadowRadius: 20,
     opacity: 1
   }
 });

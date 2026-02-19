@@ -1,6 +1,14 @@
 import { Stack } from "expo-router";
+import { LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { FavoritesProvider } from "../src/context/FavoritesContext";
+
+// Expo Go SDK 53'te bilinen uyarıları sustur (production build'de sorun yok)
+LogBox.ignoreLogs([
+  'expo-notifications: Android Push notifications',
+  'setBehaviorAsync',
+  'setBackgroundColorAsync',
+]);
 
 export default function RootLayout() {
   return (

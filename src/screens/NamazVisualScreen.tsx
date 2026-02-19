@@ -3,14 +3,15 @@ import CloseButton from '../components/CloseButton';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, Image, LayoutAnimation, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
+import { Animated, Image, LayoutAnimation, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { rf, scale, SCREEN_DIMENSIONS, verticalScale } from '../utils/responsive';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = SCREEN_DIMENSIONS;
 const ICON_PATTERN = require('../../assets/icons/pattern.png');
 
 // --- NAMAZ GÖRSELLERİ (ERKEK & KADIN) ---
@@ -469,16 +470,16 @@ export default function NamazVisualScreen({ onClose }: { onClose?: () => void })
 
 const styles = StyleSheet.create({
   backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
-  bgPatternImage: { position: 'absolute', width: 300, height: 300, opacity: 0.05, tintColor: '#D4AF37', resizeMode: 'contain' },
-  container: { padding: 20 },
+  bgPatternImage: { position: 'absolute', width: scale(300), height: scale(300), opacity: 0.05, tintColor: '#D4AF37', resizeMode: 'contain' },
+  container: { padding: scale(20) },
 
   // GENDER TOGGLE
   genderToggleContainer: {
     flexDirection: 'row',
     backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 12,
-    marginBottom: 25,
-    padding: 4,
+    borderRadius: scale(12),
+    marginBottom: verticalScale(25),
+    padding: scale(4),
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)'
   },
@@ -487,8 +488,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 10,
+    paddingVertical: verticalScale(12),
+    borderRadius: scale(10),
   },
   genderButtonActive: {
     backgroundColor: '#D4AF37',
@@ -496,8 +497,8 @@ const styles = StyleSheet.create({
   genderText: {
     color: '#D4AF37',
     fontWeight: 'bold',
-    marginLeft: 8,
-    fontSize: 16
+    marginLeft: scale(8),
+    fontSize: rf(16)
   },
   genderTextActive: {
     color: '#0F2027',
@@ -505,8 +506,8 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 16,
-    marginBottom: 15,
+    borderRadius: scale(16),
+    marginBottom: verticalScale(15),
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
     overflow: 'hidden'
@@ -514,81 +515,81 @@ const styles = StyleSheet.create({
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 15,
+    padding: scale(15),
   },
   iconBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 15,
-    width: 80, // Sabit genişlik hizalama için
+    marginRight: scale(15),
+    width: scale(80),
     justifyContent: 'flex-end',
   },
   arabicText: {
     color: '#D4AF37',
     fontWeight: 'bold',
-    fontSize: 22,
+    fontSize: rf(22),
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-    marginRight: 10,
+    marginRight: scale(10),
     textAlign: 'right'
   },
   verticalDivider: {
-    width: 2,
-    height: 30, // Yükseklik
+    width: scale(2),
+    height: verticalScale(30),
     backgroundColor: '#D4AF37',
     opacity: 0.5,
     borderRadius: 1
   },
-  prayerName: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  prayerName: { color: '#fff', fontSize: rf(16), fontWeight: '600' },
   activeText: { color: '#D4AF37' },
-  rakats: { color: 'rgba(255,255,255,0.5)', fontSize: 12, marginTop: 2 },
+  rakats: { color: 'rgba(255,255,255,0.5)', fontSize: rf(12), marginTop: verticalScale(2) },
 
   expandedContent: {
-    padding: 15,
+    padding: scale(15),
     backgroundColor: 'rgba(0,0,0,0.2)',
     borderTopWidth: 1,
     borderTopColor: 'rgba(255,255,255,0.05)'
   },
 
-  practiceButton: { marginBottom: 20 },
+  practiceButton: { marginBottom: verticalScale(20) },
   practiceGradient: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    paddingVertical: 12, borderRadius: 12,
+    paddingVertical: verticalScale(12), borderRadius: scale(12),
   },
-  practiceText: { color: '#0F2027', fontWeight: 'bold', fontSize: 16, marginLeft: 10 },
+  practiceText: { color: '#0F2027', fontWeight: 'bold', fontSize: rf(16), marginLeft: scale(10) },
 
-  summaryTitle: { color: 'rgba(255,255,255,0.4)', fontSize: 12, marginBottom: 10, textTransform: 'uppercase' },
-  miniStep: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#D4AF37', marginRight: 10, opacity: 0.7 },
-  miniStepText: { color: 'rgba(255,255,255,0.8)', fontSize: 14 },
-  moreText: { color: 'rgba(255,255,255,0.3)', fontSize: 12, marginLeft: 16, fontStyle: 'italic' },
+  summaryTitle: { color: 'rgba(255,255,255,0.4)', fontSize: rf(12), marginBottom: verticalScale(10), textTransform: 'uppercase' },
+  miniStep: { flexDirection: 'row', alignItems: 'center', marginBottom: verticalScale(6) },
+  dot: { width: scale(6), height: scale(6), borderRadius: scale(3), backgroundColor: '#D4AF37', marginRight: scale(10), opacity: 0.7 },
+  miniStepText: { color: 'rgba(255,255,255,0.8)', fontSize: rf(14) },
+  moreText: { color: 'rgba(255,255,255,0.3)', fontSize: rf(12), marginLeft: scale(16), fontStyle: 'italic' },
 
   // --- SLIDESHOW (MODAL) ---
-  slideHeader: { padding: 20, paddingTop: 10 }, // Üstten biraz boşluk
+  slideHeader: { padding: scale(20), paddingTop: verticalScale(10) },
   headerControls: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  slideCounter: { color: 'rgba(255,255,255,0.5)', fontSize: 16, fontWeight: 'bold' },
+  slideCounter: { color: 'rgba(255,255,255,0.5)', fontSize: rf(16), fontWeight: 'bold' },
 
   // --- GÜNCEL STYLE ---
   slideContent: {
     flex: 1,
-    justifyContent: 'flex-start', // KESİN KONUM İÇİN sabitleme
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 40, // BURASI KRİTİK: Sabah ile aynı hizada olması için sabit boşluk
+    paddingHorizontal: scale(20),
+    paddingTop: verticalScale(40),
   },
-  slidePrayerName: { color: 'rgba(255,255,255,0.4)', fontSize: 16, marginBottom: 20, letterSpacing: 1, textTransform: 'uppercase' },
+  slidePrayerName: { color: 'rgba(255,255,255,0.4)', fontSize: rf(16), marginBottom: verticalScale(20), letterSpacing: 1, textTransform: 'uppercase' },
 
   slideIconContainer: {
-    width: 320,
-    height: 380, // Sabit yükseklik
+    width: scale(320),
+    height: verticalScale(380),
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20, // Metinle arası
+    marginBottom: verticalScale(20),
   },
   imageFrame: {
     width: '100%',
     height: '100%',
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: scale(20),
+    padding: scale(20),
     zIndex: 2,
     justifyContent: 'center',
     alignItems: 'center',
@@ -599,74 +600,72 @@ const styles = StyleSheet.create({
     height: '100%',
     zIndex: 3,
   },
-  // glowEffect style removed intentionally
 
-  // Metin kapsayıcısı için sabit alan
   textContainer: {
-    height: 280, // Daha detaylı açıklamalar için yükseklik artırıldı
+    height: verticalScale(280),
     width: '100%',
     alignItems: 'center',
-    paddingHorizontal: 10,
+    paddingHorizontal: scale(10),
     justifyContent: 'flex-start'
   },
-  slideTitle: { color: '#D4AF37', fontSize: 32, fontWeight: 'bold', marginBottom: 10, textAlign: 'center', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
-  slideArabic: { color: '#fff', fontSize: 18, fontStyle: 'italic', marginBottom: 10, textAlign: 'center', opacity: 0.9 },
-  slideDesc: { color: 'rgba(255,255,255,0.7)', fontSize: 16, textAlign: 'center', lineHeight: 24 },
+  slideTitle: { color: '#D4AF37', fontSize: rf(32), fontWeight: 'bold', marginBottom: verticalScale(10), textAlign: 'center', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+  slideArabic: { color: '#fff', fontSize: rf(18), fontStyle: 'italic', marginBottom: verticalScale(10), textAlign: 'center', opacity: 0.9 },
+  slideDesc: { color: 'rgba(255,255,255,0.7)', fontSize: rf(16), textAlign: 'center', lineHeight: rf(24) },
 
-  slideFooter: { padding: 20, alignItems: 'center', marginBottom: 20 },
-  tapHint: { color: 'rgba(255,255,255,0.3)', fontSize: 14 },
+  slideFooter: { padding: scale(20), alignItems: 'center', marginBottom: verticalScale(20) },
+  tapHint: { color: 'rgba(255,255,255,0.3)', fontSize: rf(14) },
 
   // --- BİLGİ KARTI STİLLERİ ---
   infoCard: {
     backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 16,
-    padding: 20,
-    marginTop: 20,
+    borderRadius: scale(16),
+    padding: scale(20),
+    marginTop: verticalScale(20),
     borderWidth: 1,
     borderColor: 'rgba(212, 175, 55, 0.2)',
   },
   infoHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: verticalScale(15),
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.1)',
-    paddingBottom: 10,
+    paddingBottom: verticalScale(10),
   },
   infoTitle: {
     color: '#D4AF37',
-    fontSize: 18,
+    fontSize: rf(18),
     fontWeight: 'bold',
-    marginLeft: 10,
+    marginLeft: scale(10),
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   infoText: {
     color: 'rgba(255,255,255,0.8)',
-    fontSize: 14,
-    lineHeight: 22,
-    marginBottom: 10,
+    fontSize: rf(14),
+    lineHeight: rf(22),
+    marginBottom: verticalScale(10),
   },
   separator: {
     height: 1,
     backgroundColor: 'rgba(255,255,255,0.1)',
-    marginVertical: 15,
+    marginVertical: verticalScale(15),
   },
   hadithContainer: {
     flexDirection: 'row',
-    marginBottom: 5,
+    marginBottom: verticalScale(5),
   },
   hadithText: {
     color: '#fff',
-    fontSize: 15,
+    fontSize: rf(15),
     fontStyle: 'italic',
     flex: 1,
-    lineHeight: 24,
+    lineHeight: rf(24),
   },
   hadithSource: {
     color: '#D4AF37',
-    fontSize: 12,
+    fontSize: rf(12),
     textAlign: 'right',
-    marginTop: 5,
+    marginTop: verticalScale(5),
     opacity: 0.8,
   }
 });

@@ -1,23 +1,24 @@
 import { doc, getDoc, getDocFromServer, getFirestore } from 'firebase/firestore';
 import { app } from '../../src/config/firebaseConfig';
+import { CACHE_DURATIONS, getFromCache, setCache } from './cacheService';
 
 const db = getFirestore(app);
 
 // --- TİP TANIMI ---
 export interface DailyStory {
   id: string;
-  type: 'ayet' | 'hadis' | 'dua'; // Sadece Ayet ve Hadis dinamik, Dua sabit
+  type: 'ayet' | 'hadis' | 'dua';
   title: string;
-  content: string; // Turkish text
-  contentAR?: string; // Arabic text
-  surah?: number; // For Ayet: Sure No
-  ayah?: number; // For Ayet: Ayet No
-  subTitle?: string; // Ek bilgi (örn: Bakara Suresi, 183. Ayet)
+  content: string;
+  contentAR?: string;
+  surah?: number;
+  ayah?: number;
+  subTitle?: string;
   icon?: string;
   color?: string;
 }
 
-// --- ANA FONKSİYON ---
+// --- ANA FONKSİYON (Günlük cache) ---
 export const fetchDailyContent = async (customDate?: string): Promise<DailyStory[]> => {
   try {
     let docId = customDate;
@@ -27,31 +28,30 @@ export const fetchDailyContent = async (customDate?: string): Promise<DailyStory
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, '0');
       const day = String(now.getDate()).padStart(2, '0');
-      // Doküman ID: YYYY-MM-DD
       docId = `${year}-${month}-${day}`;
     }
 
-    console.log(`🔥 Firebase'den veri çekiliyor: ${docId}`);
+    // Günlük cache kontrolü
+    const cacheKey = `daily_content_${docId}`;
+    const cached = await getFromCache<DailyStory[]>(cacheKey, CACHE_DURATIONS.ONE_DAY);
+    if (cached) return cached;
 
     const docRef = doc(db, 'daily_stories', docId);
 
-    // Önce sunucudan güncel (Türkçe) veriyi almaya çalış
     let docSnap;
     try {
       docSnap = await getDocFromServer(docRef);
     } catch (e) {
-      console.warn("Sunucudan veri alınamadı, cache'e bakılıyor...", e);
-      // İnternet yoksa cache'den al
       docSnap = await getDoc(docRef);
     }
 
     if (docSnap.exists()) {
       const data = docSnap.data();
-      // Gelen veriyi filtrele: Sadece 'ayet' ve 'hadis' tiplerini al
       const filteredStories = (data.stories as any[]).filter(s => s.type === 'ayet' || s.type === 'hadis');
-      return filteredStories as DailyStory[];
+      const result = filteredStories as DailyStory[];
+      await setCache(cacheKey, result);
+      return result;
     } else {
-      console.warn(`⚠️ Bugüne (${docId}) ait veri bulunamadı, yedek dönülüyor.`);
       return getFallbackData();
     }
 
@@ -61,7 +61,7 @@ export const fetchDailyContent = async (customDate?: string): Promise<DailyStory
   }
 };
 
-// --- YEDEK VERİ (Database boşsa veya internet yoksa) ---
+// --- YEDEK VERİ ---
 const getFallbackData = (): DailyStory[] => {
   return [
     {

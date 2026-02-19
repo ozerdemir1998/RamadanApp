@@ -6,6 +6,7 @@ import { ActivityIndicator, FlatList, Platform, StatusBar, StyleSheet, Text, Tou
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
 import { fetchNafileNamazlar, NafileNamaz } from '../services/nafileService';
+import { rf, scale, verticalScale } from '../utils/responsive';
 
 export default function NafileListScreen() {
     const router = useRouter();
@@ -92,11 +93,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     listContainer: {
-        padding: 20,
+        padding: scale(20),
     },
     card: {
-        marginBottom: 15,
-        borderRadius: 16,
+        marginBottom: verticalScale(15),
+        borderRadius: scale(16),
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.1)',
         overflow: 'hidden',
@@ -104,25 +105,25 @@ const styles = StyleSheet.create({
     cardGradient: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 15,
+        padding: scale(15),
     },
     arabicContainer: {
-        width: 80,
+        width: scale(80),
         justifyContent: 'center',
         alignItems: 'center',
     },
     arabicText: {
-        fontSize: 18,
+        fontSize: rf(18),
         color: '#D4AF37',
         fontWeight: 'bold',
         fontFamily: Platform.OS === 'ios' ? 'GeezaPro-Bold' : 'serif',
         textAlign: 'center',
     },
     separator: {
-        width: 2,
+        width: scale(2),
         height: '80%',
         backgroundColor: '#D4AF37',
-        marginHorizontal: 15,
+        marginHorizontal: scale(15),
         borderRadius: 1,
         opacity: 0.6
     },
@@ -130,10 +131,10 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     cardTitle: {
-        fontSize: 15,
+        fontSize: rf(15),
         fontWeight: 'bold',
         color: '#fff',
-        marginBottom: 4,
+        marginBottom: verticalScale(4),
         fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
     },
 });

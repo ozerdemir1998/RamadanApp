@@ -7,7 +7,8 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
-import { DailyStory, fetchDailyContent } from '../services/contentService'; // EKLENDİ
+import { DailyStory, fetchDailyContent } from '../services/contentService';
+import { rf, scale, verticalScale } from '../utils/responsive';
 
 const ICON_PATTERN = require('../../assets/icons/ramadan.png');
 
@@ -451,76 +452,72 @@ export default function MediaPlayerScreen() {
 const styles = StyleSheet.create({
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0F2027' },
   backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
-  bgPatternImage: { position: 'absolute', width: 250, height: 250, opacity: 0.05, tintColor: '#D4AF37', resizeMode: 'contain' },
+  bgPatternImage: { position: 'absolute', width: scale(250), height: scale(250), opacity: 0.05, tintColor: '#D4AF37', resizeMode: 'contain' },
 
-  // HEADER styles removed
+  content: { padding: scale(20), alignItems: 'center' },
+  titleSection: { alignItems: 'center', marginBottom: verticalScale(25) },
+  subTitle: { fontSize: rf(16), color: 'rgba(255,255,255,0.6)', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', letterSpacing: 1, textAlign: 'center' },
 
-  content: { padding: 20, alignItems: 'center' },
-  titleSection: { alignItems: 'center', marginBottom: 25 },
-  subTitle: { fontSize: 16, color: 'rgba(255,255,255,0.6)', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', letterSpacing: 1, textAlign: 'center' },
-
-  langSwitchContainer: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 25, padding: 4, marginBottom: 30, borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.2)' },
-  langBtn: { paddingVertical: 10, paddingHorizontal: 35, borderRadius: 20 },
+  langSwitchContainer: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: scale(25), padding: scale(4), marginBottom: verticalScale(30), borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.2)' },
+  langBtn: { paddingVertical: verticalScale(10), paddingHorizontal: scale(35), borderRadius: scale(20) },
   activeLang: { backgroundColor: '#D4AF37' },
   langText: { fontWeight: '600', color: 'rgba(255,255,255,0.6)' },
   activeLangText: { color: '#0F2027', fontWeight: 'bold' },
 
   card: {
     backgroundColor: 'rgba(0,0,0,0.2)',
-    padding: 30,
-    borderRadius: 20,
+    padding: scale(30),
+    borderRadius: scale(20),
     width: '100%',
-    minHeight: 200,
+    minHeight: verticalScale(200),
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(212, 175, 55, 0.3)',
   },
-  // Türkçe Metin Stili
   textContent: {
-    fontSize: 18,
+    fontSize: rf(18),
     color: '#fff',
     textAlign: 'center',
-    lineHeight: 32,
+    lineHeight: rf(32),
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif'
   },
-  // Arapça Metin Stili
   arabicText: {
-    fontSize: 26,
+    fontSize: rf(26),
     textAlign: 'center',
-    lineHeight: 50,
+    lineHeight: rf(50),
     fontWeight: 'bold',
     color: '#fff'
   },
 
-  playerContainer: { width: '100%', marginTop: 30 },
-  sliderWrapper: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, width: '100%' },
-  timeText: { color: '#D4AF37', fontSize: 12, width: 40, textAlign: 'center' },
+  playerContainer: { width: '100%', marginTop: verticalScale(30) },
+  sliderWrapper: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: verticalScale(10), width: '100%' },
+  timeText: { color: '#D4AF37', fontSize: rf(12), width: scale(40), textAlign: 'center' },
 
   playButton: {
-    width: 80, height: 80, borderRadius: 40,
+    width: scale(80), height: scale(80), borderRadius: scale(40),
     backgroundColor: '#D4AF37',
     justifyContent: 'center', alignItems: 'center',
-    shadowColor: '#D4AF37', shadowOpacity: 0.5, shadowRadius: 15, elevation: 10
+    shadowColor: '#D4AF37', shadowOpacity: 0.5, shadowRadius: scale(15), elevation: 10
   },
   controlsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 30, // Buttonlar arası boşluk
-    marginTop: 10
+    gap: scale(30),
+    marginTop: verticalScale(10)
   },
   seekButton: {
-    padding: 10,
+    padding: scale(10),
     backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 25,
+    borderRadius: scale(25),
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)'
   },
   pauseButton: { backgroundColor: '#FFD700', opacity: 0.9 },
   disabledButton: { backgroundColor: 'rgba(255,255,255,0.1)', shadowOpacity: 0 },
-  playHint: { marginTop: 15, color: 'rgba(255,255,255,0.5)', fontSize: 12 },
+  playHint: { marginTop: verticalScale(15), color: 'rgba(255,255,255,0.5)', fontSize: rf(12) },
 
-  noAudioContainer: { alignItems: 'center', marginTop: 10, opacity: 0.6 },
-  noAudioText: { color: '#aaa', fontSize: 12, marginTop: 5 }
+  noAudioContainer: { alignItems: 'center', marginTop: verticalScale(10), opacity: 0.6 },
+  noAudioText: { color: '#aaa', fontSize: rf(12), marginTop: verticalScale(5) }
 });

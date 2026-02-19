@@ -1,14 +1,15 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import CloseButton from '../components/CloseButton';
 import ScreenHeader from '../components/ScreenHeader';
 import { RAMADAN_DATA, RamadanDay } from '../data/ramadanData';
 import { getRamadanPrayerTimes } from '../services/prayerTimeService';
+import { rf, scale, SCREEN_DIMENSIONS, verticalScale } from '../utils/responsive';
 
-const { width } = Dimensions.get('window');
+const { width } = SCREEN_DIMENSIONS;
 
 // Grid İçin Yardımcı Satır Bileşeni
 const GridTimeRow = ({ label, time, highlight, isKadir }: { label: string, time: string, highlight?: boolean, isKadir?: boolean }) => (
@@ -236,36 +237,36 @@ export default function ImsakiyeScreen() {
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: { padding: 15 },
+  scrollContainer: { padding: scale(12) },
 
   // HEADER STYLE
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingBottom: 10,
+    paddingBottom: verticalScale(10),
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.1)'
   },
-  headerTitle: { fontSize: 26, fontWeight: 'bold', color: '#D4AF37', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
-  headerSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 2 },
+  headerTitle: { fontSize: rf(24), fontWeight: 'bold', color: '#D4AF37', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+  headerSubtitle: { fontSize: rf(12), color: 'rgba(255,255,255,0.6)', marginTop: verticalScale(2) },
 
   // TOGGLE BUTONLARI
   iconToggleContainer: {
     flexDirection: 'row',
     backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 20,
-    padding: 4,
+    borderRadius: scale(20),
+    padding: scale(3),
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)'
   },
   iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 18,
+    width: scale(36),
+    height: scale(36),
+    borderRadius: scale(18),
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 2
+    marginLeft: scale(2)
   },
   activeIconButton: {
     backgroundColor: '#D4AF37'
@@ -274,15 +275,15 @@ const styles = StyleSheet.create({
   // LİSTE GÖRÜNÜMÜ
   tableContainer: { width: '100%' },
   tableHeader: {
-    flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10,
-    borderBottomWidth: 1, borderBottomColor: '#D4AF37', marginBottom: 5,
+    flexDirection: 'row', justifyContent: 'space-between', paddingVertical: verticalScale(8),
+    borderBottomWidth: 1, borderBottomColor: '#D4AF37', marginBottom: verticalScale(4),
   },
-  colText: { color: 'rgba(255,255,255,0.6)', fontSize: 11, textAlign: 'center', flex: 1, fontWeight: 'bold' },
-  colDate: { flex: 1.2, textAlign: 'left', paddingLeft: 5 },
+  colText: { color: 'rgba(255,255,255,0.6)', fontSize: rf(10), textAlign: 'center', flex: 1, fontWeight: 'bold' },
+  colDate: { flex: 1.2, textAlign: 'left', paddingLeft: scale(4) },
 
   tableRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)',
+    paddingVertical: verticalScale(10), borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)',
   },
   tableRowAlt: { backgroundColor: 'rgba(212, 175, 55, 0.03)' },
 
@@ -290,35 +291,35 @@ const styles = StyleSheet.create({
   kadirRow: {
     backgroundColor: 'rgba(212, 175, 55, 0.15)',
     borderColor: 'rgba(212, 175, 55, 0.3)',
-    borderWidth: 1, borderRadius: 8,
-    marginVertical: 2
+    borderWidth: 1, borderRadius: scale(8),
+    marginVertical: verticalScale(2)
   },
   kadirText: { color: '#FFD700', fontWeight: 'bold' },
   kadirCard: { borderColor: '#D4AF37', borderWidth: 2, backgroundColor: 'rgba(212, 175, 55, 0.1)' },
   kadirCardHeader: { backgroundColor: 'rgba(212, 175, 55, 0.25)' },
 
-  dateCol: { flex: 1.2, paddingLeft: 5 },
-  dayNum: { color: '#D4AF37', fontSize: 14, fontWeight: 'bold' },
-  dateText: { color: 'rgba(255,255,255,0.5)', fontSize: 10 },
+  dateCol: { flex: 1.2, paddingLeft: scale(4) },
+  dayNum: { color: '#D4AF37', fontSize: rf(13), fontWeight: 'bold' },
+  dateText: { color: 'rgba(255,255,255,0.5)', fontSize: rf(9) },
 
-  timeText: { color: '#fff', fontSize: 13, flex: 1, textAlign: 'center', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
+  timeText: { color: '#fff', fontSize: rf(11), flex: 1, textAlign: 'center', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
   iftarText: { color: '#D4AF37', fontWeight: 'bold' },
-  chevronCol: { width: 25, alignItems: 'center', justifyContent: 'center' }, // Sabit genişlik for chevron
+  chevronCol: { width: scale(22), alignItems: 'center', justifyContent: 'center' },
 
   // GRID GÖRÜNÜMÜ
   gridContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   gridCard: {
-    width: (width - 40) / 2,
+    width: (width - scale(36)) / 2,
     backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 12,
+    borderRadius: scale(12),
     borderWidth: 1,
     borderColor: 'rgba(212, 175, 55, 0.2)',
-    marginBottom: 15,
+    marginBottom: verticalScale(12),
     overflow: 'hidden'
   },
   cardHeader: {
     backgroundColor: 'rgba(212, 175, 55, 0.1)',
-    padding: 10,
+    padding: scale(8),
     alignItems: 'center',
     justifyContent: 'center',
     borderBottomWidth: 1,
@@ -327,45 +328,44 @@ const styles = StyleSheet.create({
   },
   headerDuaButton: {
     position: 'absolute',
-    right: 10, top: 10,
+    right: scale(8), top: scale(8),
     backgroundColor: 'rgba(255,255,255,0.1)',
-    padding: 5, borderRadius: 15
+    padding: scale(4), borderRadius: scale(15)
   },
-  cardDay: { color: '#D4AF37', fontWeight: 'bold', fontSize: 16, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', textAlign: 'center' },
-  cardDate: { color: 'rgba(255,255,255,0.6)', fontSize: 12, marginTop: 2, textAlign: 'center' },
+  cardDay: { color: '#D4AF37', fontWeight: 'bold', fontSize: rf(14), fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', textAlign: 'center' },
+  cardDate: { color: 'rgba(255,255,255,0.6)', fontSize: rf(10), marginTop: verticalScale(2), textAlign: 'center' },
 
-  cardBody: { padding: 10 },
-  gridRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  gridLabel: { color: 'rgba(255,255,255,0.6)', fontSize: 12 },
-  gridDot: { flex: 1, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.1)', marginHorizontal: 5, marginBottom: 4 },
-  gridTime: { color: '#fff', fontSize: 13, fontWeight: '500' },
+  cardBody: { padding: scale(8) },
+  gridRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: verticalScale(5) },
+  gridLabel: { color: 'rgba(255,255,255,0.6)', fontSize: rf(11) },
+  gridDot: { flex: 1, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.1)', marginHorizontal: scale(4), marginBottom: verticalScale(3) },
+  gridTime: { color: '#fff', fontSize: rf(12), fontWeight: '500' },
 
   // MODAL STYLES
   modalOverlay: {
     flex: 1, backgroundColor: 'rgba(0,0,0,0.8)',
-    justifyContent: 'center', alignItems: 'center', padding: 20
+    justifyContent: 'center', alignItems: 'center', padding: scale(20)
   },
   modalContent: {
-    width: '100%', maxHeight: '70%', borderRadius: 20, overflow: 'hidden',
+    width: '100%', maxHeight: '70%', borderRadius: scale(20), overflow: 'hidden',
     borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.5)'
   },
-  modalGradient: { padding: 20, width: '100%' },
-  // HEADER
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  modalTitle: { fontSize: 22, fontWeight: 'bold', color: '#D4AF37', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
-  closeButton: { padding: 5 },
+  modalGradient: { padding: scale(20), width: '100%' },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: verticalScale(20) },
+  modalTitle: { fontSize: rf(20), fontWeight: 'bold', color: '#D4AF37', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+  closeButton: { padding: scale(5) },
   modalScroll: { alignItems: 'center' },
 
   arabicContainer: {
     backgroundColor: 'rgba(255,255,255,0.05)',
-    padding: 20, borderRadius: 15, width: '100%', alignItems: 'center',
-    marginBottom: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)'
+    padding: scale(18), borderRadius: scale(15), width: '100%', alignItems: 'center',
+    marginBottom: verticalScale(20), borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)'
   },
   arabicText: {
-    fontSize: 24, color: '#D4AF37', textAlign: 'center',
+    fontSize: rf(22), color: '#D4AF37', textAlign: 'center',
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif'
   },
-  divider: { width: 50, height: 2, backgroundColor: '#D4AF37', opacity: 0.5, marginBottom: 20 },
-  meaningTitle: { color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', fontSize: 12, letterSpacing: 2, marginBottom: 10 },
-  meaningText: { color: '#fff', fontSize: 16, textAlign: 'center', lineHeight: 24 }
+  divider: { width: scale(50), height: 2, backgroundColor: '#D4AF37', opacity: 0.5, marginBottom: verticalScale(20) },
+  meaningTitle: { color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', fontSize: rf(11), letterSpacing: 2, marginBottom: verticalScale(10) },
+  meaningText: { color: '#fff', fontSize: rf(15), textAlign: 'center', lineHeight: rf(22) }
 });

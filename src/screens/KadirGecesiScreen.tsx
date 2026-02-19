@@ -2,12 +2,12 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenHeader from '../components/ScreenHeader';
 import { KADIR_GECESI_CONTENT } from '../data/specialOccasionsData';
+import { rf, scale, verticalScale } from '../utils/responsive';
 
-const { width } = Dimensions.get('window');
 const ICON_PATTERN = require('../../assets/icons/ramadan.png');
 
 export default function KadirGecesiScreen() {
@@ -184,45 +184,45 @@ export default function KadirGecesiScreen() {
 
 const styles = StyleSheet.create({
     backgroundPatternContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
-    bgPatternImage: { position: 'absolute', width: 400, height: 400, opacity: 0.03, tintColor: '#D4AF37', resizeMode: 'contain' },
+    bgPatternImage: { position: 'absolute', width: scale(400), height: scale(400), opacity: 0.03, tintColor: '#D4AF37', resizeMode: 'contain' },
 
-    scrollContent: { paddingHorizontal: 20, paddingBottom: 20 },
+    scrollContent: { paddingHorizontal: scale(20), paddingBottom: verticalScale(20) },
 
-    heroSection: { marginBottom: 30, borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.3)' },
-    heroGradient: { padding: 30, alignItems: 'center' },
-    heroTitle: { fontSize: 22, fontWeight: 'bold', color: '#D4AF37', textAlign: 'center', marginBottom: 10, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
-    heroDescription: { fontSize: 16, color: 'rgba(255,255,255,0.9)', textAlign: 'center', lineHeight: 24 },
+    heroSection: { marginBottom: verticalScale(30), borderRadius: scale(20), overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.3)' },
+    heroGradient: { padding: scale(30), alignItems: 'center' },
+    heroTitle: { fontSize: rf(22), fontWeight: 'bold', color: '#D4AF37', textAlign: 'center', marginBottom: verticalScale(10), fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+    heroDescription: { fontSize: rf(16), color: 'rgba(255,255,255,0.9)', textAlign: 'center', lineHeight: rf(24) },
 
-    sectionHeader: { fontSize: 18, color: '#D4AF37', marginBottom: 15, fontWeight: '600', marginLeft: 5 },
+    sectionHeader: { fontSize: rf(18), color: '#D4AF37', marginBottom: verticalScale(15), fontWeight: '600', marginLeft: scale(5) },
 
-    cardContainer: { marginBottom: 15, borderRadius: 15, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
-    cardGradient: { padding: 20 },
-    cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-    iconBox: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(212, 175, 55, 0.1)', justifyContent: 'center', alignItems: 'center', marginRight: 15 },
-    cardTitle: { fontSize: 18, fontWeight: 'bold', color: '#FFF' },
-    divider: { height: 1, backgroundColor: 'rgba(255,255,255,0.1)', marginBottom: 10 },
-    cardText: { fontSize: 15, color: 'rgba(255,255,255,0.8)', lineHeight: 22 },
+    cardContainer: { marginBottom: verticalScale(15), borderRadius: scale(15), overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+    cardGradient: { padding: scale(20) },
+    cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: verticalScale(10) },
+    iconBox: { width: scale(40), height: scale(40), borderRadius: scale(20), backgroundColor: 'rgba(212, 175, 55, 0.1)', justifyContent: 'center', alignItems: 'center', marginRight: scale(15) },
+    cardTitle: { fontSize: rf(18), fontWeight: 'bold', color: '#FFF' },
+    divider: { height: 1, backgroundColor: 'rgba(255,255,255,0.1)', marginBottom: verticalScale(10) },
+    cardText: { fontSize: rf(15), color: 'rgba(255,255,255,0.8)', lineHeight: rf(22) },
 
     // NEW UTILS
-    actionRow: { flexDirection: 'row', marginTop: 15, gap: 10 },
+    actionRow: { flexDirection: 'row', marginTop: verticalScale(15), gap: scale(10) },
     actionButton: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: 'rgba(212, 175, 55, 0.08)',
-        paddingVertical: 10,
-        paddingHorizontal: 10,
-        borderRadius: 10,
+        paddingVertical: verticalScale(10),
+        paddingHorizontal: scale(10),
+        borderRadius: scale(10),
         borderWidth: 1,
         borderColor: 'rgba(212, 175, 55, 0.15)'
     },
     actionIcon: {
-        width: 28, height: 28, borderRadius: 14, backgroundColor: 'rgba(212, 175, 55, 0.6)',
-        justifyContent: 'center', alignItems: 'center', marginRight: 8
+        width: scale(28), height: scale(28), borderRadius: scale(14), backgroundColor: 'rgba(212, 175, 55, 0.6)',
+        justifyContent: 'center', alignItems: 'center', marginRight: scale(8)
     },
-    actionText: { color: 'rgba(212, 175, 55, 0.9)', fontWeight: 'bold', fontSize: 13 },
+    actionText: { color: 'rgba(212, 175, 55, 0.9)', fontWeight: 'bold', fontSize: rf(13) },
 
-    fullWidthButton: { width: '100%', borderRadius: 12, overflow: 'hidden' },
-    fullWidthGradient: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 12, paddingHorizontal: 20, backgroundColor: 'rgba(212, 175, 55, 0.12)' },
-    fullWidthBtnText: { color: 'rgba(212, 175, 55, 0.9)', fontWeight: 'bold', fontSize: 15 }
+    fullWidthButton: { width: '100%', borderRadius: scale(12), overflow: 'hidden' },
+    fullWidthGradient: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: scale(12), paddingHorizontal: scale(20), backgroundColor: 'rgba(212, 175, 55, 0.12)' },
+    fullWidthBtnText: { color: 'rgba(212, 175, 55, 0.9)', fontWeight: 'bold', fontSize: rf(15) }
 });
