@@ -15,7 +15,7 @@ export const fetchDailyAyet = async () => {
       `https://api.alquran.cloud/v1/ayah/${randomSurah}:${randomVerse}/tr.diyanet`,
       { signal: controller.signal }
     );
-    
+
     clearTimeout(timeoutId); // İşlem başarılıysa zamanlayıcıyı iptal et
 
     if (!response.ok) throw new Error("API yanıt vermedi");
@@ -33,7 +33,7 @@ export const fetchDailyAyet = async () => {
       icon: 'book'
     };
   } catch (error) {
-    console.log("Ayet internetten çekilemedi, yedek gösteriliyor.");
+
     // İnternet yoksa gösterilecek sabit veri
     return {
       title: 'Günün Ayeti',
@@ -62,7 +62,7 @@ const HADIS_HAVUZU = [
 export const fetchDailyHadis = async () => {
   // Havuzdan rastgele bir hadis seç
   const randomHadis = HADIS_HAVUZU[Math.floor(Math.random() * HADIS_HAVUZU.length)];
-  
+
   // Sanki API'den geliyormuş gibi döndür (Promise yapısı bozulmasın diye async bıraktık)
   return {
     title: 'Günün Hadisi',

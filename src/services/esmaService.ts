@@ -14,7 +14,7 @@ export const getEsmaulHusna = async (): Promise<Esma[]> => {
 
         const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
         if (querySnapshot.empty) {
-            console.log('Esmaul Husna collection is empty. Seeding...');
+
             await seedEsmaulHusna();
             return ESMAUL_HUSNA;
         }
@@ -44,7 +44,7 @@ export const seedEsmaulHusna = async () => {
         });
 
         await batch.commit();
-        console.log('Esmaul Husna seeded successfully!');
+
     } catch (error) {
         console.error("Error seeding Esmaul Husna:", error);
     }

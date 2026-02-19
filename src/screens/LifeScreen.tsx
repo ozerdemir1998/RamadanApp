@@ -50,7 +50,7 @@ export default function LifeScreen() {
       ) {
         const now = new Date();
         if (now.toDateString() !== lastFetchDate) {
-          console.log("📅 Yeni gün algılandı (Foreground), içerik yenileniyor...");
+
           loadContent();
         }
       }
@@ -63,7 +63,7 @@ export default function LifeScreen() {
     const timeToMidnight = tomorrow.getTime() - now.getTime();
 
     const timer = setTimeout(() => {
-      console.log("🌙 Gece yarısı oldu, içerik yenileniyor...");
+
       loadContent();
     }, timeToMidnight + 1000); // 1 saniye opsiyonel gecikme
 

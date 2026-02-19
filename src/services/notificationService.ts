@@ -33,7 +33,7 @@ export async function registerForPushNotificationsAsync() {
     }
 
     if (finalStatus !== 'granted') {
-      console.log('Bildirim izni verilmedi!');
+
       return false;
     }
 
@@ -145,7 +145,7 @@ export async function schedulePrayerNotifications(times: PrayerTimes) {
         });
       }
     }
-    console.log("✅ Bildirimler ezan sesiyle planlandı.");
+
   } catch (e) {
     console.warn('Bildirim zamanlama başarısız:', e);
   }

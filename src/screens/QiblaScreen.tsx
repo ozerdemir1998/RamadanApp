@@ -110,7 +110,7 @@ export default function QiblaScreen({ onClose }: { onClose?: () => void }) {
       }
       setLoading(false);
     } catch (e) {
-      console.log("Error in Qibla init:", e);
+
       setLoading(false);
     }
   };

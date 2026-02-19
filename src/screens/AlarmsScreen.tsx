@@ -45,7 +45,7 @@ export default function AlarmsScreen() {
                 setSettings(JSON.parse(saved));
             }
         } catch (e) {
-            console.log("Ayar yükleme hatası");
+
         }
     };
 

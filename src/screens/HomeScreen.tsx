@@ -206,7 +206,7 @@ export default function HomeScreen() {
         await AsyncStorage.setItem(cacheKey, JSON.stringify(selectedEsma));
       }
     } catch (e) {
-      console.log("Error loading daily esma", e);
+
     }
   };
 
@@ -228,7 +228,7 @@ export default function HomeScreen() {
       setDailyQuote(selectedQuote);
       await AsyncStorage.setItem(cacheKey, JSON.stringify(selectedQuote));
     } catch (e) {
-      console.log("Error loading daily quote", e);
+
     }
   };
 

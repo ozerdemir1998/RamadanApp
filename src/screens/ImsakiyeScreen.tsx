@@ -38,7 +38,7 @@ export default function ImsakiyeScreen() {
         setData(apiData);
       }
     } catch (e) {
-      console.log("Failed to load live data, using fallback", e);
+
     } finally {
       setLoading(false);
     }
